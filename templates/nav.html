@@ -17,7 +17,7 @@
           
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
               <ul class="navbar-nav mr-auto">
-                <li class="nav-item active">
+                <li class="nav-item">
                   <a class="nav-link" href = "{{url_for('index')}}">Home <span class="sr-only"></span></a>
                 </li>
                 <li class="nav-item">
@@ -26,9 +26,7 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Investments</a>
                     <div class="dropdown-menu">
-                        <form action = "toPage" method = "POST">
                       <a class="dropdown-item" name = "sgeq">Singapore Equities</a>
-                      </form>
                       <a class="dropdown-item" href="#">US Equities</a>
                       <a class="dropdown-item" href="#">Precious Metals</a>
                     </div>
