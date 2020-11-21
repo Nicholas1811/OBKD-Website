@@ -1,0 +1,21 @@
+{% extends 'nav.html' %}
+
+{% block content %}
+<h3>{% block title %}Welcome to TradeX{% endblock %}</h3>
+<html>
+
+<head>
+</head>
+
+<body>
+    Name: {{eqdata['Name']}}
+    Description: {{eqdata['Description']}}
+    Asset Type: {{eqdata['AssetType']}}
+    {{pastprices['1. open']}}
+    {{pastprices['2. high']}}
+    {{pastprices['3. low']}}
+    {{pastprices['4. close']}}
+</body>
+
+</html>
+{% endblock %}

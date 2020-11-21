@@ -1,0 +1,38 @@
+{% extends 'nav.html' %}
+
+{% block content %}
+<h3>{% block title %}Welcome to TradeX{% endblock %}</h3>
+<html>
+<style>
+    .imgus {
+        width: 100%;
+        height: 20%;
+        border: 2px solid black;
+        box-shadow: 2px 2px 2px 2px grey;
+        opacity: 0.6;
+    }
+</style>
+
+<head>
+</head>
+
+<body>
+    {% for data in usequitylist %}
+    <div class="container">
+        <br>
+        <img src="{{data['image']}}" class="imgus">
+        Name : {{data['Name']}}
+        <br>
+        <form action="usequityinfo" method="POST">
+            <input type="hidden" name="stockdata" value="{{data}}">
+            <input type="hidden" name="stockticker" value="{{data['Symbol']}}">
+            <button class="btn btn-primary" type="submit">More details about {{data['Name']}}</button>
+        </form>
+
+    </div>
+    {% endfor %}
+
+</body>
+
+</html>
+{% endblock %}
