@@ -22,12 +22,13 @@
         <br>
         <img src="{{data['image']}}" class="imgus">
         Name : {{data['Name']}}
-        <br>
         <form action="usequityinfo" method="POST">
             <input type="hidden" name="stockdata" value="{{data}}">
             <input type="hidden" name="stockticker" value="{{data['Symbol']}}">
             <button class="btn btn-primary" type="submit">More details about {{data['Name']}}</button>
         </form>
+        <br>
+
 
     </div>
     {% endfor %}
