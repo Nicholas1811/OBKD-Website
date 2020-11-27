@@ -1,37 +1,44 @@
 {% extends 'nav.html' %}
 
 {% block content %}
-<h3>{% block title %}Welcome to TradeX{% endblock %}</h3>
 <html>
 <style>
     .imgus {
         width: 100%;
-        height: 20%;
-        border: 2px solid black;
-        box-shadow: 2px 2px 2px 2px grey;
-        opacity: 0.6;
+        height: 100%;
+        border: 1px solid black;
     }
 </style>
-
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mystyle.css') }}">
 <head>
 </head>
 
 <body>
-    {% for data in usequitylist %}
     <div class="container">
         <br>
-        <img src="{{data['image']}}" class="imgus">
-        Name : {{data['Name']}}
-        <form action="usequityinfo" method="POST">
-            <input type="hidden" name="stockdata" value="{{data}}">
-            <input type="hidden" name="stockticker" value="{{data['Symbol']}}">
-            <button class="btn btn-primary" type="submit">More details about {{data['Name']}}</button>
-        </form>
+        <h3 class = "text-light">{% block title %}US Equities{% endblock %}</h3>
         <br>
-
-
+        <div class="row">
+            {% for data in usequitylist %}
+            <div class="col-sm-12">
+                <div class="card shadow p-3 mb-5 rounded" style="border: 3px solid black; background-color: #202020;">
+                    <div class="card-body">
+                        <p class="text-center font-weight-bold" style="color: #CDCDCD; font-family: Helvetica;">{{data['Name']}}</p>
+                        <p class="text-center font-weight-bold" style="color: #CDCDCD; font-family: Helvetica;">{{data['Symbol']}}</p>
+                        <p class="text-center font-weight-bold" style="color: #CDCDCD; font-family: Helvetica;">{{data['Industry']}}</p>
+                        <form action="usequityinfo" method="POST">
+                            <input type = "hidden" value = "{{data['Name']}}" name = "equityname">
+                            <input type="hidden" name="stockticker" value="{{data['Symbol']}}">
+                            <input type="hidden" name="industry" value="{{data['Industry']}}">
+                            <button class="btn btn-secondary font-weight-bold" type="submit" style="width: 100%;" font-family: Calibri;>View more</button>
+                        </form>
+                    </div>
+                </div>
+                <br>
+            </div>
+            {% endfor %}
+        </div>
     </div>
-    {% endfor %}
 
 </body>
 

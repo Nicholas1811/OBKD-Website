@@ -1,0 +1,179 @@
+{% extends 'nav.html' %}
+
+{% block content %}
+<html>
+<style>
+    h3,
+    p {
+        font-family: Helvetica;
+        color: #CDCDCD;
+    }
+</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mystyle.css') }}">
+
+<head>
+    <style>
+        /* .stocktable {
+            width: 50%;
+        } */
+
+        .inputfield {
+            width: 500%;
+            display: block;
+        }
+
+        h3,
+        p,
+        th,
+        td {
+            color: #CDCDCD;
+            font-family: Helvetica;
+        }
+
+        .topnav {
+            overflow: hidden;
+            background-color: #121212;
+        }
+
+        .topnav button {
+            float: left;
+            display: block;
+            background: #202020;
+            color: #CDCDCD;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            font-family: Helvetica;
+        }
+
+        button {
+            color: #CDCDCD;
+        }
+
+        .topnav button:hover {
+            border-bottom: 3px solid #CDCDCD;
+        }
+
+        .topnav button.active {
+            border-bottom: 3px solid #CDCDCD;
+        }
+
+        p {
+            color: #CDCDCD;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm">
+                <h3 class="font-weight-bold">{% block title %}{{equityname}}({{tickercode}}){% endblock %}</h3>
+                <div class="topnav">
+                    <form action="usequityinfo" method="POST">
+                        <input type="hidden" value="{{tickercode}}" name="stockticker">
+                        <input type="hidden" value="{{industry}}" name="industry">
+                        <button class="btn" href="" type="submmit">Summary</button>
+                    </form>
+                    <button class="btn" type="submit">Financial Ratios</button>
+                    <button href="#contact" class="btn">Profile</button>
+                    <form action="fundementals" method="POST">
+                        <input type="hidden" value="{{tickercode}}" name="stockticker">
+                        <input type="hidden" value="{{industry}}" name="industry">
+                        <button type="submit" class="active btn">Financial Statements</button>
+                    </form>
+                </div>
+                <p>Show: Income Statment Reported Currency: {{incomestatement[0]['reportedCurrency']}}</p>
+            </div>
+
+        </div>
+        <div class="container">
+            <div class="row">
+                <div class="col">
+                    <p>
+                        Total Revenue : {{incomestatement[0]['totalRevenue']}}
+                    </p>
+                    <p>
+                        Total Operating Expense : {{incomestatement[0]['totalOperatingExpense']}}
+                    </p>
+                    <p>
+                        Cost of Revenue : {{incomestatement[0]['costOfRevenue']}}
+                    </p>
+                    <p>
+                        Gross Profit : {{incomestatement[0]['grossProfit']}}
+                    </p>
+                    <p>
+                        EBIT : {{incomestatement[0]['ebit']}}
+                    </p>
+                    <p>
+                        Net Income : {{incomestatement[0]['netIncome']}}
+                    </p>
+                    <p>
+                        Research Development : {{incomestatement[0]['researchAndDevelopment']}}
+                    </p>
+                    <p>
+                        Effect of Accounting Charges : {{incomestatement[0]['effectOfAccountingCharges']}}
+                    </p>
+                    <p>
+                        Income before Tax : {{incomestatement[0]['incomeBeforeTax']}}
+                    </p>
+                    <p>
+                        Selling General Administrative : {{incomestatement[0]['sellingGeneralAdministrative']}}
+                    </p>
+                    <p>
+                        Other Non Operating Income : {{incomestatement[0]['otherNonOperatingIncome']}}
+                    </p>
+                    <p>
+                        Operating Income : {{incomestatement[0]['operatingIncome']}}
+                    </p>
+                    <p>
+                        Other Operating Expense : {{incomestatement[0]['otherOperatingExpense']}}
+                    </p>
+                    <p>
+                        Interest Expense : {{incomestatement[0]['interestExpense']}}
+                    </p>
+                    <p>
+                        Tax Provision : {{incomestatement[0]['taxProvision']}}
+                    </p>
+                    <p>
+                        Interest Income : {{incomestatement[0]['interestIncome']}}
+                    </p>
+                    <p>
+                        Net Interest Income : {{incomestatement[0]['netInterestIncome']}}
+                    </p>
+                    <p>
+                        Extraordinary Items : {{incomestatement[0]['extraordinaryItems']}}
+                    </p>
+                    <p>
+                        Non recurring : {{incomestatement[0]['nonRecurring']}}
+                    </p>
+                    <p>
+                        Other Items : {{incomestatement[0]['otherItems']}}
+                    </p> 
+                    <p> Income Tax Expense : {{incomestatement[0]['incomeTaxExpense']}}</p>
+                    <p> Total other Income Expense : {{incomestatement[0]['totalOtherIncomeExpense']}}</p>
+                    <p> Discontinued Operations : {{incomestatement[0]['discontinuedOperations']}}</p>
+                    <p> Net Income from Continuing Operations :
+                        {{incomestatement[0]['netIncomeFromContinuingOperations']}}</p>
+                    <p> Net Income Applicable to Common Shares :
+                        {{incomestatement[0]['netIncomeApplicableToCommonShares']}}</p>
+                    <p> Preferred Stock and Other Adjustments :
+                        {{incomestatement[0]['preferredStockAndOtherAdjustments']}}</p>
+
+                    </p>
+                </div>
+                <div class="col">
+                    <p>
+                        {% for key, value in incomestatement[1].items() %}
+                        <p>
+                        {{value}}
+
+                        <br>
+                        {% endfor %}
+                    </p>
+                </div>
+            </div>
+</body>
+
+</html>
+{% endblock %}

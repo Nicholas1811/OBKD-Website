@@ -1,15 +1,17 @@
 {% extends 'nav.html' %}
 
 {% block content %}
-<h3>{% block title %}Welcome to TradeX{% endblock %}</h3>
 <html>
 
 <head>
-    hhhh
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mystyle.css') }}">
 </head>
 
 <body>
-    <p>Hello, sir!</p>
+    <div class="container">
+        <h3>{% block title %}Welcome to TradeX{% endblock %}</h3>
+        <p>Hello, sir!</p>
+    </div>
 </body>
 
 </html>

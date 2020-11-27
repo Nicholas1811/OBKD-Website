@@ -3,5 +3,8 @@
 {% block content %}
 <h3>{% block title %}Welcome User!{% endblock %}</h3>
 <html>
+    <head>
+        <link rel="stylesheet" href="{{ url_for('static', filename='css/mystyle.css') }}">
+        </head>
 </html>
 {% endblock %}

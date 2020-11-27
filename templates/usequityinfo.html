@@ -1,122 +1,185 @@
 {% extends 'nav.html' %}
 
 {% block content %}
-<h3>{% block title %}{{eqdata['Name']}} ({{eqdata['Symbol']}}){% endblock %}</h3>
-<br>
-Asset Type: {{eqdata['AssetType']}}
-<br>
-Exchange: {{eqdata['Exchange']}}
-<br>
-Current Price: {{pastprices['4. close']}}
-<br>
-Industry: {{eqdata['Industry']}}
 
 <html>
 
 <head>
     <style>
-        .stocktable {
+        /* .stocktable {
             width: 50%;
-        }
-        .inputfield{
+        } */
+
+        .inputfield {
             width: 500%;
             display: block;
         }
+
+        h3,
+        p,
+        th,
+        td {
+            color: #CDCDCD;
+            font-family: Helvetica;
+        }
+
+        .topnav {
+            overflow: hidden;
+            background-color: #121212;
+        }
+
+        .topnav button {
+            float: left;
+            display: block;
+            background: #202020;
+            color: #CDCDCD;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            font-family: Helvetica;
+        }
+
+        button {
+            color: #CDCDCD;
+        }
+
+        .topnav button:hover {
+            border-bottom: 3px solid #CDCDCD;
+        }
+
+        .topnav button.active {
+            border-bottom: 3px solid #CDCDCD;
+        }
     </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mystyle.css') }}">
 </head>
 
 <body>
-    <div class="stocktable">
-        <table class="table table-sm">
-            <tbody>
-                <tr>
-                    <th scope="row">PE Ratio</th>
-                    <td>{{eqdata['PERatio']}}</td>
-                    <th scope="row">PEG Ratio</th>
-                    <td>{{eqdata['PEGRatio']}}</td>
-                </tr>
-                <tr>
-                    <th scope="row">EPS</th>
-                    <td>{{eqdata['EPS']}}</td>
-                    <th scope="row">EPS</th>
-                    <td>{{eqdata['EPS']}}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Beta</th>
-                    <td>{{eqdata['Beta']}}</td>
-                    <th scope="row">52 Week Range</th>
-                    <td>{{eqdata['52WeekLow']}} - {{eqdata['52WeekHigh']}}</td>
-                </tr>
-                <tr>
-                    <th scope="row">Dividend Yield</th>
-                    <td>{{eqdata['DividendYield']}}</td>
-                    <th scope="row">Dividend per Share</th>
-                    <td>{{eqdata['DividendPerShare']}}</td>
-                </tr>
-                <tr>
-                    <th scope="row">P/B Ratio</th>
-                    <td>{{eqdata['PriceToBookRatio']}}</td>
-                    <th scope="row">Profit Margin</th>
-                    <td>{{eqdata['ProfitMargin']}}</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    <br>
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#financialstatementmodal">Look at
-        statements</button>
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">Buy</button>
-    <!-- Modal -->
-    <div class="modal fade" id="financialstatementmodal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
-        aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabel">Income Statement/Balance Sheet</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h3 class="font-weight-bold">{% block title %}{{eqdata['Name']}} ({{eqdata['Symbol']}}){% endblock %}
+                </h3>
+                <div class="topnav">
+                    <form action="usequityinfo" method="POST">
+                        <!-- name, ticker and industry is passed to display. -->
+                        <input type = "hidden" value = "{{eqdata['Name']}}" name = "equityname">
+                        <input type="hidden" value="{{eqdata['Symbol']}}" name="stockticker">
+                        <input type="hidden" value="{{industry}}" name="industry">
+                        <button class="active btn" href="" type="submmit">Summary</button>
+                    </form>
+                    <button class="btn" type="submit">Financial Ratios</button>
+                    <button href="#contact" class="btn">Profile</button>
+                    <form action="fundementals" method="POST">
+                        <input type = "hidden" value = "{{eqdata['Name']}}" name = "equityname">
+                        <input type="hidden" value="{{eqdata['Symbol']}}" name="stockticker">
+                        <input type="hidden" value="{{industry}}" name="industry">
+                        <button type="submit" class="btn">Financial Statements</button>
+                    </form>
                 </div>
-                <div class="modal-body">
-                    <p>Description: {{eqdata['Description']}}</p>
-                    {% for key, value in icdic %}
-                    {{key}} : {{value}}
-                    {% endfor %}
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                </div>
+                <!-- <form action="fundementals" method="POST">
+                    <input type="hidden" value="{{eqdata['Symbol']}}" name="fun">
+                    <button type="submit" class="btn btn-primary">Fundementals</button>
+                </form>
+                <form action="financialratios" method="POST">
+                    <!-<input type="hidden" value="{{eqdata['MarketCapitalization']}}" name="marketcap">
+                    <input type="hidden" value="{{eqdata['EBITDA']}}" name="EBITDA">
+                    <input type="hidden" value="{{eqdata['PERatio']}}" name="peratio">
+                    <input type="hidden" value="{{eqdata['PEGRatio']}}" name="pegratio">
+                    <input type="hidden" value="{{eqdata['BookValue']}}" name="bookvalue">
+                    <input type="hidden" value="{{eqdata['Dividend']}}" name="dividend">
+                    <input type="hidden" value="{{eqdata['DividendPerShare']}}" name="dividendpershare">
+                    <input type="hidden" value="{{eqdata['DividendYield']}}" name="dividendyield">
+                    <input type="hidden" value="{{eqdata['MarketCapitalization']}}" name="marketcap">
+                    <input type="hidden" value="{{eqdata['MarketCapitalization']}}" name="marketcap">
+                    <input type="hidden" value="{{eqdata['MarketCapitalization']}}" name="marketcap">
+                    <input type="hidden" value="{{eqdata['MarketCapitalization']}}" name="marketcap"> -->
+                <!-- <button type="submit" class="btn btn-primary">Financial Ratios</button> -->
+                <!-- </form>  -->
+                <p>Asset Type: {{eqdata['AssetType']}}</p>
+                <p>Exchange: {{eqdata['Exchange']}}</p>
+                <p>Current Price: {{pastprices['4. close']}}</p>
+                <p>Industry: {{industry}}</p>
             </div>
         </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-6">
+                <div class="stocktable">
+                    <table class="table table-sm">
+                        <tbody>
+                            <tr>
+                                <th scope="row">PE Ratio</th>
+                                <td>{{eqdata['PERatio']}}</td>
+                                <th scope="row">PEG Ratio</th>
+                                <td>{{eqdata['PEGRatio']}}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">EPS</th>
+                                <td>{{eqdata['EPS']}}</td>
+                                <th scope="row">EPS</th>
+                                <td>{{eqdata['EPS']}}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Beta</th>
+                                <td>{{eqdata['Beta']}}</td>
+                                <th scope="row">52 Week Range</th>
+                                <td>{{eqdata['52WeekLow']}} - {{eqdata['52WeekHigh']}}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Dividend Yield</th>
+                                <td>{{eqdata['DividendYield']}}</td>
+                                <th scope="row">Dividend per Share</th>
+                                <td>{{eqdata['DividendPerShare']}}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">P/B Ratio</th>
+                                <td>{{eqdata['PriceToBookRatio']}}</td>
+                                <th scope="row">Profit Margin</th>
+                                <td>{{eqdata['ProfitMargin']}}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <br>
+                <button type="button" class="btn btn-primary" data-toggle="modal"
+                    data-target="#exampleModal">Trade</button>
+            </div>
+        </div>
+    </div>
     </div>
     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="modal-header">
+                <div class="modal-header" style="background-color:	#202020; border-bottom: 2px solid grey;">
                     <h5 class="modal-title" id="exampleModalLabel">Purchase Stock for {{eqdata['Name']}}
                         ({{eqdata['Symbol']}})</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <div class="modal-body">
-                    <form action = "usequityinfo" method="post">
-                        <input value="{{eqdata['Symbol']}}" name="stockticker" type = "hidden">
-                        Amount to purchase <input placeholder="Key in the amount you want to purchase" name="amount" type = "text"
-                        value="" class="form-control" >
+                <div class="modal-body" style="background-color:#121212; ">
+                    <form action="usequitypurchase" method="post">
+                        <input value="{{eqdata['Symbol']}}" name="stockticker" type="hidden">
+                        <p>Amount to purchase</p> <input placeholder="Key in the amount you want to purchase"
+                            name="amount" type="text" value="" class="form-control">
                         <br>
-                        Current Price <input value="{{pastprices['1. open']}}" disabled name="price" type = "text" class="form-control">
+                        <p>Current Price</p> <input value="{{pastprices['1. open']}}" disabled name="price" type="text"
+                            class="form-control">
                         <br>
-                        Price per stock in SGD <input value="{{totalvalue}}" disabled name="newprice" type = "text" class="form-control">
+                        <p>Price in SGD</p> <input value="{{totalvalue}}" disabled name="newprice" type="text"
+                            class="form-control">
                         <br>
                         <!-- one api call here -->
-                        <p class = "text-danger">*Do note that the current exchange rate for USD/SGD is {{sgd}} </p>
+                        <p class="text-danger">*Do note that the current exchange rate for USD/SGD is {{sgd}} </p>
                         <button class="btn btn-primary" type="submit">Buy</button>
-                        </form>
+                    </form>
 
                 </div>
-                <div class="modal-footer">
+                <div class="modal-footer" style="background-color:#121212; border: transparent; ">
 
                 </div>
             </div>
