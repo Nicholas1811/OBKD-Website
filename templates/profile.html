@@ -1,10 +1,104 @@
 {% extends 'nav.html' %}
 
 {% block content %}
-<h3>{% block title %}Welcome User!{% endblock %}</h3>
 <html>
-    <head>
-        <link rel="stylesheet" href="{{ url_for('static', filename='css/mystyle.css') }}">
-        </head>
+
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mystyle.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <style>
+        .icon-container {
+            display: table;
+            border: 2px solid #cdcdcd;
+            padding: 10px;
+            border-radius: 25px;
+            font-size: 2rem;
+        }
+
+        .text-container {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        h4,
+        h5 {
+            font-family: Helvetica;
+            color: #CDCDCD;
+        }
+
+        #textalign {
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm-2">
+                <br>
+                <div class="wrapper">
+                    <div class="icon-container">
+                        <i class="fa fa-user fa-5x center-block" aria-hidden="true" id="icon"></i>
+                    </div>
+                    <div class="text-container">
+                        <h5 style="margin-left: 7%;">{{nick}}</h5>
+                        <h6 style="margin-left: 0%;">Retail Account Type</h6>
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-5">
+                <br>
+                <h5 class="font-weight-bold">Full Name: {{custinfo['first_name']}} {{custinfo['last_name']}}</h5>
+                <h6>Email: {{currentuser['email']}}</h6>
+                <h6>FIDOR Bank Account Number: {{accountno}}</h6>
+                <h6>Date of Birth: {{custbirthday}}</h6>
+                <h6>Country of Residence: Germany</h6>
+                <h6>City of Residence: {{custinfo['adr_city']}}</h6>
+                <h6>Home Address: {{custinfo['adr_street']}} {{custinfo['adr_street_number']}}
+                    {{custinfo['adr_post_code']}} </h6>
+                <h6>Balance in your FIDOR Bank Account in {{customerdetails['currency']}}: ${{balance}}</h6>
+            </div>
+            <div class="col-sm-5">
+                <br>
+                <h6>You were last logged in on {{currentuser['last_sign_in_at']}}</h6>
+                <h6>Account created on {{createdat}}</h6>
+                <h6>Account last updated at {{updateat}}</h6>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col">
+                <h5 class="font-weight-bold" id="textalign">Past Transactions</h5>
+                <table class = "table table-hover">
+                    <thead>
+                        <th scope="col">ID</th>
+                        <th scope="col">Investment Type</th>
+                        <th scope="col">Amount</th>
+                        <th scope="col">Currency</th>
+                        <th scope="col">Transaction Date</th>
+                        <th scope="col">Date Credited</th>
+                    </thead>
+                    <tbody>
+                        {% for data in transcdata %}
+                        <tr>
+                        <th scope = "row">{{data['id']}}</th>
+                        <td>{{data['subject']}}</td>
+                        <td>${{data['amount']}}</td>
+                        <td>{{data['currency']}}</td>
+                        <td>{{data['booking_date']}}</td>
+                        <td>{{data['value_date']}}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+
+
+
+
 </html>
 {% endblock %}

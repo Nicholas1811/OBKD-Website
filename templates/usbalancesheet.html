@@ -1,0 +1,134 @@
+{% extends 'nav.html' %}
+
+{% block content %}
+<html>
+<style>
+    h3,
+    p {
+        font-family: Helvetica;
+        color: #CDCDCD;
+    }
+</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mystyle.css') }}">
+
+<head>
+    <style>
+        /* .stocktable {
+            width: 50%;
+        } */
+
+        .inputfield {
+            width: 500%;
+            display: block;
+        }
+
+        h3,
+        p,
+        th,
+        td {
+            color: #CDCDCD;
+            font-family: Helvetica;
+        }
+
+        .topnav {
+            overflow: hidden;
+            background-color: #121212;
+        }
+
+        .topnav button {
+            float: left;
+            display: block;
+            background: #202020;
+            color: #CDCDCD;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            font-family: Helvetica;
+        }
+
+        button {
+            color: #CDCDCD;
+        }
+
+        .topnav button:hover {
+            border-bottom: 3px solid #CDCDCD;
+        }
+
+        .topnav button.active {
+            border-bottom: 3px solid #CDCDCD;
+        }
+
+        p {
+            color: #CDCDCD;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col-sm">
+                <h3 class="font-weight-bold">{% block title %}{{equityname}}({{stockticker}}){% endblock %}</h3>
+                <div class="topnav">
+                    <form action="usequityinfo" method="POST">
+                        <input type="hidden" value="{{tickercode}}" name="stockticker">
+                        <input type="hidden" value="{{industry}}" name="industry">
+                        <input type="hidden" value="{{equityname}}" name="equityname">
+                        <button class="btn" type="submmit">Summary</button>
+                    </form>
+                    <button type="submit" class="active btn">Financial Statements</button>
+                    <form action="usequityprofile" method="POST">
+                        <input type="hidden" value="{{tickercode}}" name="stockticker">
+                        <input type="hidden" value="{{industry}}" name="industry">
+                        <input type="hidden" value="{{equityname}}" name="equityname">
+                        <button type="submit" class="btn">Profile</button>
+                    </form>
+                    <form action="ratio" method="POST">
+                        <input type="hidden" value="{{tickercode}}" name="stockticker">
+                        <input type="hidden" value="{{industry}}" name="industry">
+                        <input type="hidden" value="{{equityname}}" name="equityname">
+                        <button class="btn" type="submit">Financial Ratios</button>
+                    </form>
+                    <form action="historicaldata" method="POST">
+                        <input type="hidden" value="{{tickercode}}" name="stockticker">
+                        <input type="hidden" value="{{industry}}" name="industry">
+                        <input type="hidden" value="{{equityname}}" name="equityname">
+                        <button class="btn" type="submit">Historical Data</button>
+                    </form>
+
+                </div>
+                <div class="topnav">
+                    <form action="fundementals" method="POST">
+                        <input type="hidden" value="{{tickercode}}" name="stockticker">
+                        <input type="hidden" value="{{industry}}" name="industry">
+                        <input type="hidden" value="{{equityname}}" name="equityname">
+                        <button class="btn" type="submmit">Income Statement</button>
+                    </form>
+                        <button class="btn active" type="submit">Balance Sheet</button>
+                    <button type="submit" class="btn">Cash Flow</button>
+                </div>
+                <p>Reported Currency: USD</p>
+                <p>All numbers in thousands</p>
+            </div>
+
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <table class="table">
+                    <thead>
+                    </thead>
+
+                    <tbody>
+
+
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+{% endblock %}
