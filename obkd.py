@@ -18,6 +18,12 @@ def aboutUs():
 @app.route("/profile", methods = ['GET','POST'])
 def profile():
     return render_template("profile.html")
+
+#Kalangi Sai Pooja - Precious Metals.
+@app.route("/Metals", methods = ['GET'])
+def Metals ():
+    return render_template("metals.html")
+
 #Nicholas's US Equity Main Page which shows different equities.
 @app.route("/USEquities", methods = ['GET', 'POST'])
 def USEquities():

@@ -1,0 +1,28 @@
+{% extends 'nav.html' %}
+
+{% block content %}
+<html>
+<style>
+    .imgus {
+        width: 100%;
+        height: 100%;
+        border: 1px solid black;
+    }
+</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mystyle.css') }}">
+<head>
+</head>
+
+<body>
+    <div class="container">
+        <br>
+        <h3 class = "text-light">{% block title %}Precious Metals{% endblock %}</h3>
+        <br>
+        <div class="row">
+            
+        </div>
+    </div>
+</body>
+
+</html>
+{% endblock %}
