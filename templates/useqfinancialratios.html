@@ -1,0 +1,309 @@
+{% extends 'nav.html' %}
+
+{% block content %}
+
+<html>
+
+<head>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mystyle.css') }}">
+    <style>
+        .inputfield {
+            width: 500%;
+            display: block;
+        }
+
+        h3,
+        p,
+        th,
+        td {
+            color: #CDCDCD;
+            font-family: Helvetica;
+        }
+
+        .topnav {
+            overflow: hidden;
+            background-color: #121212;
+        }
+
+        .topnav button {
+            float: left;
+            display: block;
+            background: #202020;
+            color: #CDCDCD;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            font-family: Helvetica;
+        }
+
+        button {
+            color: #CDCDCD;
+        }
+
+        .topnav button:hover {
+            border-bottom: 3px solid #CDCDCD;
+        }
+
+        .topnav button.active {
+            border-bottom: 3px solid #CDCDCD;
+        }
+
+        p {
+            color: #CDCDCD;
+        }
+
+        h6 {
+            color: #CDCDCD;
+            font-weight: bold;
+        }
+
+        td {
+            text-align: right;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h3 class="font-weight-bold">{% block title %}{{name}}({{fun}}){% endblock %}</h3>
+                <div class="topnav">
+                    <form action="usequityinfo" method="POST">
+                        <input type="hidden" value="{{fun}}" name="stockticker">
+                        <input type="hidden" value="{{industry}}" name="industry">
+                        <input type="hidden" value="{{name}}" name="equityname">
+                        <button class="btn" type="submit">Summary</button>
+                    </form>
+                    <form action="fundementals" method="POST">
+                        <input type="hidden" value="{{fun}}" name="stockticker">
+                        <input type="hidden" value="{{industry}}" name="industry">
+                        <input type="hidden" value="{{name}}" name="equityname">
+                        <button type="submit" class="btn">Financial Statements</button>
+                    </form>
+                    <form action="usequityprofile" method="POST">
+                        <input type="hidden" value="{{fun}}" name="stockticker">
+                        <input type="hidden" value="{{industry}}" name="industry">
+                        <input type="hidden" value="{{name}}" name="equityname">
+                        <button type="submit" class="btn">Profile</button>
+                    </form>
+                    <button class="btn active" type="submit">Financial Ratios</button>
+                    <form action="historicaldata" method="POST">
+                        <input type="hidden" value="{{fun}}" name="stockticker">
+                        <input type="hidden" value="{{industry}}" name="industry">
+                        <input type="hidden" value="{{name}}" name="equityname">
+                        <button class="btn" type="submit">Historical Data</button>
+                    </form>
+
+                </div>
+                <p>Reported Currency: USD</p>
+                <p>All numbers in thousands</p>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <h5>Valuation Ratios</h5>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Market Capitalization</th>
+                            <td>{{marketcap}}</td>
+                        </tr>
+                        <tr>
+                            <th>Trailing PE</th>
+                            <td>{{trailingPE}}</td>
+                        </tr>
+                        <tr>
+                            <th>Forward PE</th>
+                            <td>{{forwardPE}}</td>
+                        </tr>
+                        <tr>
+                            <th>PEG Ratio</th>
+                            <td>{{pegRatio}}</td>
+                        </tr>
+                        <tr>
+                            <th>Price to Sales Ratio(TTM)</th>
+                            <td>{{pricetosales}}</td>
+                        </tr>
+                        <tr>
+                            <th>Price to Book</th>
+                            <td>{{pricetobook}}</td>
+                        </tr>
+                        <tr>
+                            <th>Enterprise/Revenue</th>
+                            <td>{{enrev}}</td>
+                        </tr>
+                        <tr>
+                            <th>Enterprise/EBITDA</th>
+                            <td>{{eneb}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h5>Financial Highlights</h5>
+                <h6>Fiscal year</h6>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Fiscal Year Ends</th>
+                            <td>{{overview['FiscalYearEnd']}}</td>
+                        </tr>
+                        <tr>
+                            <th>Most-Recent Quarter</th>
+                            <td>{{overview['LatestQuarter']}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h6>Profitability</h6>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Profit Margin</th>
+                            <td>{{profitmargin}}%</td>
+                        </tr>
+                        <tr>
+                            <th>Operating Margin (TTM)</th>
+                            <td>{{operatingmargin}}%</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h6>Management effectiveness</h6>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Return on Assets (TTM)</th>
+                            <td>{{returnonasset}}%</td>
+                        </tr>
+                        <tr>
+                            <th>Return on Equity (TTM)</th>
+                            <td>{{returnonequity}}%</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h6>Income statement</h6>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Revenue per Share (TTM)</th>
+                            <td>{{revpershare}}</td>
+                        </tr>
+                        <tr>
+                            <th>Quarterly Revenue Growth (YOY)</th>
+                            <td>{{quarterlyrevenuegrowth}}%</td>
+                        </tr>
+                        <tr>
+                            <th>Gross Profit (TTM)</th>
+                            <td>{{gp}}</td>
+                        </tr>
+                        <tr>
+                            <th>EBITDA</th>
+                            <td>{{ebitda}}</td>
+                        </tr>
+                        <tr>
+                            <th>Diluted EPS (TTM)</th>
+                            <td>{{epsttm}}</td>
+                        </tr>
+                        <tr>
+                            <th>Quarterly Earnings Growth (YOY)</th>
+                            <td>{{quarterlyearningsgrowth}}%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col">
+                <h5>Trading Information</h5>
+                <h6> Stock Price History </h6>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Beta</th>
+                            <td>{{beta}}</td>
+                        </tr>
+                        <tr>
+                            <th>52-Week High</th>
+                            <td>{{weekhigh}}</td>
+                        </tr>
+                        <tr>
+                            <th>52-Week Low</th>
+                            <td>{{weeklow}}</td>
+                        </tr>
+                        <tr>
+                            <th>50-Day Moving Average</th>
+                            <td>{{shortma}}</td>
+                        </tr>
+                        <tr>
+                            <th>200-Day Moving Average</th>
+                            <td>{{longma}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table">
+                    <h6> Share Statistics </h6>
+                    <tbody>
+                        <tr>
+                            <th>Shares Outstanding</th>
+                            <td>{{sharesoutstanding}}</td>
+                        </tr>
+                        <tr>
+                            <th>Float</th>
+                            <td>{{sharesfloat}}</td>
+                        </tr>
+                        <tr>
+                            <th>Percentage held by Insiders</th>
+                            <td>{{insider}}%</td>
+                        </tr>
+                        <tr>
+                            <th>Percentage held by Institutions</th>
+                            <td>{{institutions}}%</td>
+                        </tr>
+                        <tr>
+                            <th>Shares Short</th>
+                            <td>{{sharesshort}}</td>
+                        </tr>
+                        <tr>
+                            <th>Short Ratio</th>
+                            <td>{{shortratio}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table">
+                    <h6> Dividends and Splits </h6>
+                    <tbody>
+                        <tr>
+                            <th>Forward Annual Dividend Rate</th>
+                            <td>{{forwardannualdividendrate}}</td>
+                        </tr>
+                        <tr>
+                            <th>Forward Annual Dividend Yield</th>
+                            <td>{{forwardannualdividendyield}}</td>
+                        </tr>
+                        <tr>
+                            <th>Payout Ratio</th>
+                            <td>{{payoutratio}}%</td>
+                        </tr>
+                        <tr>
+                            <th>Dividend Date</th>
+                            <td>{{divdate}}</td>
+                        </tr>
+                        <tr>
+                            <th>Ex Dividend Date</th>
+                            <td>{{exdivdate}}</td>
+                        </tr>
+                        <tr>
+                            <th>Last Split Factor</th>
+                            <td>{{lastsplitfactor}}</td>
+                        </tr>
+                        <tr>
+                            <th>Last Split Date</th>
+                            <td>{{lastsplitdate}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
+{% endblock %}

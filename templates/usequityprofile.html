@@ -1,13 +1,17 @@
 {% extends 'nav.html' %}
 
 {% block content %}
+
 <html>
-<style>
-    p, th,td{
-        color: #cdcdcd;
-        font-family: Helvetica;
-    }
-    h3,
+
+<head>
+    <style>
+        .inputfield {
+            width: 500%;
+            display: block;
+        }
+
+        h3,
         p,
         th,
         td {
@@ -43,22 +47,22 @@
         .topnav button.active {
             border-bottom: 3px solid #CDCDCD;
         }
-</style>
-<link rel="stylesheet" href="{{ url_for('static', filename='css/mystyle.css') }}">
-<head>
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/mystyle.css') }}">
 </head>
 
 <body>
     <div class="container">
         <div class="row">
             <div class="col">
-                <h3 class="font-weight-bold">{% block title %}{{equityname}}({{stockticker}}){% endblock %}</h3>
+                <h3 class="font-weight-bold">{% block title %}{{equityname}} ({{stockticker}}){% endblock %}
+                </h3>
                 <div class="topnav">
                     <form action="usequityinfo" method="POST">
                         <input type="hidden" value="{{equityname}}" name="equityname">
                         <input type="hidden" value="{{stockticker}}" name="stockticker">
                         <input type="hidden" value="{{industry}}" name="industry">
-                        <button class="btn" type="submit">Summary</button>
+                        <button class="btn" href="" type="submit">Summary</button>
                     </form>
                     <form action="fundementals" method="POST">
                         <input type="hidden" value="{{equityname}}" name="equityname">
@@ -66,57 +70,37 @@
                         <input type="hidden" value="{{industry}}" name="industry">
                         <button type="submit" class="btn">Financial Statements</button>
                     </form>
-                    <form action="usequityprofile" method="POST">
+
+                    <button type="submit" class="btn active">Profile</button>
+
+                    <form action="ratio" method="POST">
                         <input type="hidden" value="{{equityname}}" name="equityname">
                         <input type="hidden" value="{{stockticker}}" name="stockticker">
                         <input type="hidden" value="{{industry}}" name="industry">
-                        <button type="submit" class="btn">Profile</button>
+                        <button class="btn" type="submit">Financial Ratios</button>
                     </form>
-                    <form action = "ratio" method = "POST">
+                    <form action="historicaldata" method="POST">
                         <input type="hidden" value="{{equityname}}" name="equityname">
                         <input type="hidden" value="{{stockticker}}" name="stockticker">
                         <input type="hidden" value="{{industry}}" name="industry">
-                    <button class="btn" type="submit">Financial Ratios</button>
+                        <button class="btn" type="submit">Historical Data</button>
                     </form>
-                        <button class="active btn" type="submit">Historical Data</button>
-
-
                 </div>
-                <p>Reported Currency: USD</p>
-                <p>All numbers in thousands</p>
             </div>
         </div>
     </div>
     <div class="container">
         <div class="row">
-            <table class = "table table-bordered">
-            <thead>
-                <tr>
-                  <th scope="col">Date</th>
-                  <th scope="col">Open</th>
-                  <th scope="col">High</th>
-                  <th scope="col">Low</th>
-                  <th scope="col">Close</th>
-                  <th scope="col">Volume</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for k,v in historicdata.items() %}
-                <tr>
-                  <th scope="row">{{k}}</th>
-                  <td>{{v['1. open']}}</td>
-                  <td>{{v['2. high']}}</td>
-                  <td>{{v['3. low']}}</td>
-                  <td>{{v['4. close']}}</td>
-                  <td>{{v['5. volume']}}</td>
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+            <div class="col">
+                <p>Name : {{name}}</p>
+                <p>Address : {{address}}</p>
+                <p>Sector : {{sector}}</p>
+                <p>Industry : {{industry}}</p>
+                <p>Full Time Employees : {{employees}}</p>
+            </div>
+            <p>{{description}}</p>
         </div>
     </div>
-
-    <br>
 </body>
 
 </html>

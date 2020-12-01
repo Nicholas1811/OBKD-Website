@@ -6,9 +6,9 @@
 
 <head>
     <style>
-        /* .stocktable {
-            width: 50%;
-        } */
+        td {
+            text-align: left;
+        }
 
         .inputfield {
             width: 500%;
@@ -19,7 +19,6 @@
         p,
         th,
         td {
-            color: #CDCDCD;
             font-family: Helvetica;
         }
 
@@ -47,67 +46,62 @@
             border-bottom: 3px solid #CDCDCD;
         }
 
-        .topnav button.active {
-            border-bottom: 3px solid #CDCDCD;
+        .news {
+            float: right;
+        }
+        .newsimage {
+            float: left;
         }
     </style>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/mystyle.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 </head>
+<script>
+    function changeicon() {
+        console.log('test')
+        console.log(document.getElementById('righticon').className)
+        if (document.getElementById('righticon').className == "fa fa-chevron-right clickable" || document.getElementById('righticon').className == "fa fa-chevron-right clickable collapsed") {
+            document.getElementById('righticon').className = "fa fa-chevron-down clickable"
+        } else if (document.getElementById('righticon').className = "fa fa-chevron-down clickable") {
+            document.getElementById('righticon').className = "fa fa-chevron-right clickable"
+        }
+    }
+</script>
 
 <body>
+
+
     <div class="container">
         <div class="row">
             <div class="col">
                 <h3 class="font-weight-bold">{% block title %}{{eqdata['Name']}} ({{eqdata['Symbol']}}){% endblock %}
                 </h3>
+                <h3 class="font-weight-bold">{{pastprices['4. close']}}
+                </h3>
+                <!-- MINI NAV BAR -->
                 <div class="topnav">
-                    <form action="usequityinfo" method="POST">
-                        <!-- name, ticker and industry is passed to display. -->
-                        <input type = "hidden" value = "{{eqdata['Name']}}" name = "equityname">
-                        <input type="hidden" value="{{eqdata['Symbol']}}" name="stockticker">
-                        <input type="hidden" value="{{industry}}" name="industry">
-                        <button class="active btn" href="" type="submmit">Summary</button>
-                    </form>
-                    <button class="btn" type="submit">Financial Ratios</button>
-                    <button href="#contact" class="btn">Profile</button>
-                    <form action="fundementals" method="POST">
-                        <input type = "hidden" value = "{{eqdata['Name']}}" name = "equityname">
-                        <input type="hidden" value="{{eqdata['Symbol']}}" name="stockticker">
-                        <input type="hidden" value="{{industry}}" name="industry">
-                        <button type="submit" class="btn">Financial Statements</button>
-                    </form>
+                    <button class="tablink btn" onclick="openpage('summary', this)" id="defaultOpen">Summary</button>
+                    <button class="tablink btn" onclick="openpage('financialstatement', this )">Financial
+                        Statements</button>
+                    <button class="tablink btn" onclick="openpage('profile', this)">Profile</button>
+                    <button class="tablink btn" onclick="openpage('financialratio', this)">Financial Ratios</button>
+                    <button class="tablink btn" onclick="openpage('historicaldata', this)">Historical Data</button>
+                    <button class="tablink btn" onclick="openpage('news', this)">News</button>
                 </div>
-                <!-- <form action="fundementals" method="POST">
-                    <input type="hidden" value="{{eqdata['Symbol']}}" name="fun">
-                    <button type="submit" class="btn btn-primary">Fundementals</button>
-                </form>
-                <form action="financialratios" method="POST">
-                    <!-<input type="hidden" value="{{eqdata['MarketCapitalization']}}" name="marketcap">
-                    <input type="hidden" value="{{eqdata['EBITDA']}}" name="EBITDA">
-                    <input type="hidden" value="{{eqdata['PERatio']}}" name="peratio">
-                    <input type="hidden" value="{{eqdata['PEGRatio']}}" name="pegratio">
-                    <input type="hidden" value="{{eqdata['BookValue']}}" name="bookvalue">
-                    <input type="hidden" value="{{eqdata['Dividend']}}" name="dividend">
-                    <input type="hidden" value="{{eqdata['DividendPerShare']}}" name="dividendpershare">
-                    <input type="hidden" value="{{eqdata['DividendYield']}}" name="dividendyield">
-                    <input type="hidden" value="{{eqdata['MarketCapitalization']}}" name="marketcap">
-                    <input type="hidden" value="{{eqdata['MarketCapitalization']}}" name="marketcap">
-                    <input type="hidden" value="{{eqdata['MarketCapitalization']}}" name="marketcap">
-                    <input type="hidden" value="{{eqdata['MarketCapitalization']}}" name="marketcap"> -->
-                <!-- <button type="submit" class="btn btn-primary">Financial Ratios</button> -->
-                <!-- </form>  -->
-                <p>Asset Type: {{eqdata['AssetType']}}</p>
-                <p>Exchange: {{eqdata['Exchange']}}</p>
-                <p>Current Price: {{pastprices['4. close']}}</p>
-                <p>Industry: {{industry}}</p>
             </div>
         </div>
     </div>
 
+
+    <!-- SUMMARY PAGE -->
     <div class="container">
         <div class="row">
-            <div class="col-sm-6">
+            <div class="col-sm-6 tabcontent" id="summary">
                 <div class="stocktable">
+                    <p>Asset Type: {{eqdata['AssetType']}}</p>
+                    <p>Exchange: {{eqdata['Exchange']}}</p>
+                    <p>Current Price: {{pastprices['4. close']}}</p>
+                    <p>Industry: {{industry}}</p>
                     <table class="table table-sm">
                         <tbody>
                             <tr>
@@ -144,12 +138,520 @@
                     </table>
                 </div>
                 <br>
-                <button type="button" class="btn btn-primary" data-toggle="modal"
-                    data-target="#exampleModal">Trade</button>
+                <button type="submit" class="btn btn-primary" data-target="#exampleModal"
+                    data-toggle="modal">Trade</button>
             </div>
         </div>
     </div>
+
+
+
+
+
+    <!-- FINANCIAL STATEMENTS PAGE -->
+    <div class="container tabcontent" id="financialstatement">
+        <div class="row">
+            <div class="col">
+                <div class="topnav">
+                    <br>
+                    <button class="tablink btn" onclick="openpage('financialstatement', this)">Income Statement</button>
+                    <button class="tablink btn" onclick="openpage('balance', this)">Balance Sheet</button>
+                    <button class="tablink btn" onclick="openpage('cashflow', this)">Cash Flow</button>
+                </div>
+                <br>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Breakdown</th>
+                            {% for i in range (0, 5 )%}
+                            <th scope="col" style="text-align: center;">{{incomestatement[i]['fiscalDateEnding']}}</th>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Total Revenue</td>
+                            {% for i in range (0, 5 )%}
+                            <td style="text-align: center;">{{incomestatement[i]['totalRevenue']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row">Cost of Revenue</td>
+                            {% for i in range (0, 5 )%}
+                            <td style="text-align: center;">{{incomestatement[i]['costOfRevenue']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row">Gross Profit</td>
+                            {% for i in range (0, 5 )%}
+                            <td style="text-align: center;">{{incomestatement[i]['grossProfit']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row">
+                                <i id="righticon" onclick="changeicon()" class="fa fa-chevron-right clickable"
+                                    aria-hidden="true" data-toggle="collapse" data-target="#group-of-rows-1"
+                                    aria-expanded="false" aria-controls="group-of-rows-1"></i>Operating Expense</td>
+                            {% for i in range (0, 5 )%}
+                            <td style="text-align: center;">{{incomestatement[i]['totalOperatingExpense']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr id="group-of-rows-1" class="collapse">
+
+                            <td scope="row">
+                                <p style="margin-left: 30px;">Research and Development</p>
+                            </td>
+                            {% for i in range (0, 5 )%}
+                            <td style="text-align: center;">{{incomestatement[i]['researchAndDevelopment']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr id="group-of-rows-1" class="collapse">
+                            <td scope="row">
+                                <p style="margin-left: 30px;">Selling General Administrative</p>
+                            </td>
+                            {% for i in range (0, 5 )%}
+                            <td style="text-align: center;">{{incomestatement[i]['sellingGeneralAdministrative']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <th scope="row">Operating Income</th>
+                            {% for i in range (0,5 )%}
+                            <td style="text-align: center;">{{incomestatement[i]['operatingIncome']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row">Interest Expense</td>
+                            {% for i in range (0, 5 )%}
+                            <td style="text-align: center;">{{incomestatement[i]['interestExpense']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row">Total other Income Expense</td>
+                            {% for i in range (0, 5 )%}
+                            <td style="text-align: center;">{{incomestatement[i]['totalOtherIncomeExpense']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row">Income before Tax</td>
+                            {% for i in range (0, 5 )%}
+                            <td style="text-align: center;">{{incomestatement[i]['incomeBeforeTax']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row">Income Tax Expense</td>
+                            {% for i in range (0, 5 )%}
+                            <td style="text-align: center;">{{incomestatement[i]['incomeTaxExpense']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row">Net Income from Continuing Operations</td>
+                            {% for i in range (0, 5 )%}
+                            <td style="text-align: center;">{{incomestatement[i]['netIncomeFromContinuingOperations']}}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <th scope="row">Net Income</th>
+                            {% for i in range (0, 5 )%}
+                            <td style="text-align: center;">{{incomestatement[i]['netIncome']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row">Net Income Applicable to Common Shares</td>
+                            {% for i in range (0, 5 )%}
+                            <td style="text-align: center;">{{incomestatement[i]['netIncomeApplicableToCommonShares']}}
+                            </td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row">Other Non Operating Income </td>
+                            {% for i in range (0,5)%}
+                            <td style="text-align: center;">{{incomestatement[1]['otherNonOperatingIncome']}}
+                                {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row">EBIT</td>
+                            {% for i in range (0, 5 )%}
+                            <td style="text-align: center;">{{incomestatement[i]['ebit']}}</td>
+                            {% endfor %}
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
+    <div class="container tabcontent" id="balance">
+        <div class="row">
+            <div class="col">
+                <div class="topnav">
+                    <br>
+                    <button class="tablink btn" onclick="openpage('financialstatement', this)">Income Statement</button>
+                    <button class="tablink btn" onclick="openpage('balance', this)">Balance Sheet</button>
+                    <button class="tablink btn" onclick="openpage('cashflow', this)">Cash Flow</button>
+                </div>
+                <br>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th scope="col">Breakdown</th>
+                            {% for i in range (0, 5 )%}
+                            <th scope="col">{{balancesheetdic[i]['fiscalDateEnding']}}</th>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row">Assets</td>
+                            {% for i in range (0, 5 )%}
+                            <td style="color: #121212;">black</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row" style="text-align: right;">Current Assets</td>
+                            {% for i in range (0, 5 )%}
+                            <td style="color: #121212;">black</td>
+                            {% endfor %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col tabcontent" id="profile">
+                <p>Name : {{eqdata['Name']}}</p>
+                <p>Address : {{eqdata['Address']}}</p>
+                <p>Sector : {{eqdata['Sector']}}</p>
+                <p>Industry : {{eqdata['Industry']}}</p>
+                <p>Full Time Employees : {{eqdata['FullTimeEmployees']}}</p>
+                <p>{{eqdata['Description']}}</p>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+    <!-- FINANCIAL RATIOS -->
+    <div class="container tabcontent" id="financialratio">
+        <div class="row">
+            <div class="col">
+                <h5>Valuation Ratios</h5>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Market Capitalization</th>
+                            <td style="text-align: right;">{{marketcap}}</td>
+                        </tr>
+                        <tr>
+                            <th>Trailing PE</th>
+                            <td style="text-align: right;">{{trailingPE}}</td>
+                        </tr>
+                        <tr>
+                            <th>Forward PE</th>
+                            <td style="text-align: right;">{{forwardPE}}</td>
+                        </tr>
+                        <tr>
+                            <th>PEG Ratio</th>
+                            <td style="text-align: right;">{{pegRatio}}</td>
+                        </tr>
+                        <tr>
+                            <th>Price to Sales Ratio(TTM)</th>
+                            <td style="text-align: right;">{{pricetosales}}</td>
+                        </tr>
+                        <tr>
+                            <th>Price to Book</th>
+                            <td style="text-align: right;">{{pricetobook}}</td>
+                        </tr>
+                        <tr>
+                            <th>Enterprise/Revenue</th>
+                            <td style="text-align: right;">{{enrev}}</td>
+                        </tr>
+                        <tr>
+                            <th>Enterprise/EBITDA</th>
+                            <td style="text-align: right;">{{eneb}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h5>Financial Highlights</h5>
+                <h6>Fiscal year</h6>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Fiscal Year Ends</th>
+                            <td style="text-align: right;">{{eqdata['FiscalYearEnd']}}</td>
+                        </tr>
+                        <tr>
+                            <th>Most-Recent Quarter</th>
+                            <td style="text-align: right;">{{eqdata['LatestQuarter']}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h6>Profitability</h6>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Profit Margin</th>
+                            <td style="text-align: right;">{{profitmargin}}%</td>
+                        </tr>
+                        <tr>
+                            <th>Operating Margin (TTM)</th>
+                            <td style="text-align: right;">{{operatingmargin}}%</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h6>Management effectiveness</h6>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Return on Assets (TTM)</th>
+                            <td style="text-align: right;">{{returnonasset}}%</td>
+                        </tr>
+                        <tr>
+                            <th>Return on Equity (TTM)</th>
+                            <td style="text-align: right;">{{returnonequity}}%</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <h6>Income statement</h6>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Revenue per Share (TTM)</th>
+                            <td style="text-align: right;">{{revpershare}}</td>
+                        </tr>
+                        <tr>
+                            <th>Quarterly Revenue Growth (YOY)</th>
+                            <td style="text-align: right;">{{quarterlyrevenuegrowth}}%</td>
+                        </tr>
+                        <tr>
+                            <th>Gross Profit (TTM)</th>
+                            <td style="text-align: right;">{{gp}}</td>
+                        </tr>
+                        <tr>
+                            <th>EBITDA</th>
+                            <td style="text-align: right;">{{ebitda}}</td>
+                        </tr>
+                        <tr>
+                            <th>Diluted EPS (TTM)</th>
+                            <td style="text-align: right;">{{epsttm}}</td>
+                        </tr>
+                        <tr>
+                            <th>Quarterly Earnings Growth (YOY)</th>
+                            <td style="text-align: right;">{{quarterlyearningsgrowth}}%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col">
+                <h5>Trading Information</h5>
+                <h6> Stock Price History </h6>
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Beta</th>
+                            <td style="text-align: right;">{{beta}}</td>
+                        </tr>
+                        <tr>
+                            <th>52-Week High</th>
+                            <td style="text-align: right;">{{weekhigh}}</td>
+                        </tr>
+                        <tr>
+                            <th>52-Week Low</th>
+                            <td style="text-align: right;">{{weeklow}}</td>
+                        </tr>
+                        <tr>
+                            <th>50-Day Moving Average</th>
+                            <td style="text-align: right;">{{shortma}}</td>
+                        </tr>
+                        <tr>
+                            <th>200-Day Moving Average</th>
+                            <td style="text-align: right;">{{longma}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table">
+                    <h6> Share Statistics </h6>
+                    <tbody>
+                        <tr>
+                            <th>Shares Outstanding</th>
+                            <td style="text-align: right;">{{sharesoutstanding}}</td>
+                        </tr>
+                        <tr>
+                            <th>Float</th>
+                            <td style="text-align: right;">{{sharesfloat}}</td>
+                        </tr>
+                        <tr>
+                            <th>Percentage held by Insiders</th>
+                            <td style="text-align: right;">{{insider}}%</td>
+                        </tr>
+                        <tr>
+                            <th>Percentage held by Institutions</th>
+                            <td style="text-align: right;">{{institutions}}%</td>
+                        </tr>
+                        <tr>
+                            <th>Shares Short</th>
+                            <td style="text-align: right;">{{sharesshort}}</td>
+                        </tr>
+                        <tr>
+                            <th>Short Ratio</th>
+                            <td style="text-align: right;">{{shortratio}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <table class="table">
+                    <h6> Dividends and Splits </h6>
+                    <tbody>
+                        <tr>
+                            <th>Forward Annual Dividend Rate</th>
+                            <td style="text-align: right;">{{forwardannualdividendrate}}</td>
+                        </tr>
+                        <tr>
+                            <th>Forward Annual Dividend Yield</th>
+                            <td style="text-align: right;">{{forwardannualdividendyield}}</td>
+                        </tr>
+                        <tr>
+                            <th>Payout Ratio</th>
+                            <td style="text-align: right;">{{payoutratio}}%</td>
+                        </tr>
+                        <tr>
+                            <th>Dividend Date</th>
+                            <td style="text-align: right;">{{divdate}}</td>
+                        </tr>
+                        <tr>
+                            <th>Ex Dividend Date</th>
+                            <td style="text-align: right;">{{exdivdate}}</td>
+                        </tr>
+                        <tr>
+                            <th>Last Split Factor</th>
+                            <td style="text-align: right;">{{lastsplitfactor}}</td>
+                        </tr>
+                        <tr>
+                            <th>Last Split Date</th>
+                            <td style="text-align: right;">{{lastsplitdate}}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <!-- HISTORICAL DATA -->
+    <div class="container">
+        <div class="row">
+            <div class="col tabcontent" id="historicaldata">
+                <br>
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th scope="col">Date</th>
+                            <th scope="col">Open</th>
+                            <th scope="col">High</th>
+                            <th scope="col">Low</th>
+                            <th scope="col">Close</th>
+                            <th scope="col">Volume</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for k,v in historicdata.items() %}
+                        <tr>
+                            <th scope="row">{{k}}</th>
+                            <td>{{v['1. open']}}</td>
+                            <td>{{v['2. high']}}</td>
+                            <td>{{v['3. low']}}</td>
+                            <td>{{v['4. close']}}</td>
+                            <td>{{v['5. volume']}}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="container tabcontent" id="news">
+        <div class="row">
+            <div class="col">
+                <div class="topnav">
+                    <br>
+                    <button class="tablink btn" onclick="openpage('news', this)">All News</button>
+                    <button class="tablink btn" onclick="openpage('company', this)">Stock News</button>
+                </div>
+                {% for allnews in generalnewsdic %}
+                <div class="card">
+                    <div class="row no-gutters">
+                        <div class="col">
+                            <img src="{{allnews['image_url']}}" class="card-img-top h-100" alt="...">
+                        </div>
+                        <div class="col">
+                            <div class="card-body">
+                                <h5 class="card-title">{{allnews['title']}}</h5>
+                                <p class="card-text">{{allnews['text']}}</p>
+                                <p class="card-text">{{allnews['source_name']}}</p>
+                                <p class="card-text">{{allnews['date']}}</p>
+                                <a href="{{allnews['news_url']}}" class="btn btn-primary stretched-link">View Article</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="container tabcontent" id="company">
+        <div class="row">
+            <div class="col">
+                <div class="topnav">
+                    <br>
+                    <button class="tablink btn" onclick="openpage('news', this)">All News</button>
+                    <button class="tablink btn" onclick="openpage('company', this)">Stock News</button>
+                </div>
+                {% for allnews in stocknews %}
+                <div class="card">
+                    <div class="row no-gutters">
+                        <div class="col">
+                            <img src="{{allnews['image_url']}}" style="height: 25%; width: 25%;" alt="...">
+                        </div>
+                        <div class="col">
+                            <div class="card-body" style="background-color: #202020;">
+                                <h5 class="card-title">{{allnews['title']}}</h5>
+                                <p class="card-text">{{allnews['text']}}</p>
+                                <p class="card-text">{{allnews['source_name']}}</p>
+                                <p class="card-text">{{allnews['date']}}</p>
+                                <a href="{{allnews['news_url']}}" class="btn btn-primary stretched-link">View Article</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <script>
+
+        function openpage(pageName, elmnt) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablink");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].style.backgroundColor = "";
+            }
+            document.getElementById(pageName).style.display = "block";
+        }
+        // Get the element with id="defaultOpen" and click on it
+        document.getElementById("defaultOpen").click();
+    </script>
+    <!-- BUY MODAL -->
     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
         aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -157,7 +659,7 @@
                 <div class="modal-header" style="background-color:	#202020; border-bottom: 2px solid grey;">
                     <h5 class="modal-title" id="exampleModalLabel">Purchase Stock for {{eqdata['Name']}}
                         ({{eqdata['Symbol']}})</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="color: #CDCDCD;">
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
