@@ -29,7 +29,25 @@
         #textalign {
             text-align: center;
         }
+        .topnav {
+            overflow: hidden;
+            background-color: #121212;
+        }
+
+        .topnav button {
+            display: block;
+            background: #202020;
+            color: #CDCDCD;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            font-family: Helvetica;
+        }
+        *{
+            color: #CDCDCD;
+        }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js" integrity="sha512-d9xgZrVZpmmQlfonhQUvTR7lMPtO7NkZMkA0ABN3PHCbKA5nqylQ/yWlFAyY6hYgdF1Qh6nYiuADWwKB4C2WSw==" crossorigin="anonymous"></script>
 </head>
 
 <body>
@@ -64,6 +82,15 @@
                 <h6>You were last logged in on {{currentuser['last_sign_in_at']}}</h6>
                 <h6>Account created on {{createdat}}</h6>
                 <h6>Account last updated at {{updateat}}</h6>
+                <div class = "topnav">
+                <form action = "watchlist" method="GET">
+                <button class = "btn" href = "watchlist">Open Watchlist</button>
+                </form>
+                <br>
+                <form action = "portfolio"  method="GET">
+                    <button class = "btn" href = "portfolio">Open Current Portfolio</button>
+                    </form>
+                </div>
             </div>
         </div>
         <div class="row">
@@ -75,8 +102,7 @@
                         <th scope="col">Investment Type</th>
                         <th scope="col">Amount</th>
                         <th scope="col">Currency</th>
-                        <th scope="col">Transaction Date</th>
-                        <th scope="col">Date Credited</th>
+                        <th scope="col">Date</th>
                     </thead>
                     <tbody>
                         {% for data in transcdata %}
@@ -85,8 +111,7 @@
                         <td>{{data['subject']}}</td>
                         <td>${{data['amount']}}</td>
                         <td>{{data['currency']}}</td>
-                        <td>{{data['booking_date']}}</td>
-                        <td>{{data['value_date']}}</td>
+                        <td>{{data['updated_at']}}</td>
                         </tr>
                         {% endfor %}
                         </tbody>
@@ -95,10 +120,5 @@
         </div>
     </div>
 </body>
-
-
-
-
-
 </html>
 {% endblock %}

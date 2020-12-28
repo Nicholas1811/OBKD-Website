@@ -1,0 +1,268 @@
+{% extends 'nav.html' %}
+
+{% block content %}
+<html>
+<style>
+    .imgus {
+        width: 100%;
+        height: 100%;
+        border: 1px solid black;
+    }
+
+    h5 {
+        color: #CDCDCD;
+    }
+
+    p {
+        font-family: Helvetica;
+    }
+
+    * {
+        font-family: Helvetica;
+        color: #CDCDCD;
+    }
+</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mystyle.css') }}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"
+    integrity="sha512-d9xgZrVZpmmQlfonhQUvTR7lMPtO7NkZMkA0ABN3PHCbKA5nqylQ/yWlFAyY6hYgdF1Qh6nYiuADWwKB4C2WSw=="
+    crossorigin="anonymous"></script>
+
+<head>
+</head>
+
+<body>
+    <div class="container">
+        <h6 hidden id="portfoliodetails">{{portfolio}}</h6>
+        <h6 hidden id="sectorportdetails">{{sectorport}}</h6>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <br>
+                <h3 class = "text-light">Investment Portfolio</h3>
+                <div class="card" style="background-color: #202020; border: 3px solid black;">
+                    <p>
+                    <h4 style="color: #CDCDCD; margin-left: 5%;"><strong>Total amount invested:</strong></h4>
+                    <br>
+                    <h5 id="totalamount" style="color: #CDCDCD; text-align: center;"></h5>
+                    <br>
+                    <canvas id="myChart"></canvas>
+                </div>
+                <br>
+            </div>
+            <div class="col">
+                <br>
+                <h3 style="color: #121212;">Investment Portfolio</h3>
+                <div class="card" style="background-color: #202020; border: 3px solid black; width: 100%;">
+                    <p>
+                    <h4 style="color: #CDCDCD; margin-left: 5%;"><strong>Total amount of sectors invested in:</strong>
+                    </h4>
+                    <br>
+                    <h5 id="totalamountofsector" style="color: #CDCDCD; text-align: center;"></h5>
+                    <br>
+                    <canvas id="sectorchart"></canvas>
+                </div>
+                <br>
+            </div>
+            <br>
+        </div>
+    </div>
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <div class="card" style="background-color: #202020; border: 3px solid black;">
+                    <p>
+                    <h4 style="color: #CDCDCD; margin-left: 5%;"><strong>Total shares you own:</strong></h4>
+                    <br>
+                    <h5 id="totalshareamount" style="color: #CDCDCD; text-align: center;"></h5>
+                    <br>
+                    <canvas id="stockchart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br>
+    <script>
+        var ctx = document.getElementById('myChart');
+        var portfolioDetails = JSON.parse(document.getElementById('portfoliodetails').innerHTML)
+        amountarray = []
+        stocktickerarray = []
+        colorarray = []
+        var hex = ['a', 'b', 'c', 'd', 'e', 'f', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        var color = '#';
+        for (i in portfolioDetails) {
+            var amount = portfolioDetails[i]['totalamount']
+            var name = portfolioDetails[i]['equityname']
+            var stockticker = portfolioDetails[i]['stockticker']
+            var info = name, stockticker
+            amount = amount / 100
+            amountarray.push(amount)
+            stocktickerarray.push(info)
+            var letters = '0123456789ABCDEF';
+            var color = '#';
+            for (var i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 11)];
+            }
+            colorarray.push(color)
+            var sum = amountarray.reduce(function (a, b) {
+                return a + b;
+            }, 0)
+            sum = sum.toFixed(2)
+            document.getElementById('totalamount').innerHTML = "S$" + sum + " invested in US Equities."
+        }
+        console.log(sum)
+        console.log(color)
+        console.log(amountarray)
+        new Chart(document.getElementById("myChart"), {
+            type: 'pie',
+            data: {
+                labels: stocktickerarray,
+                datasets: [{
+                    label: "",
+                    backgroundColor: colorarray,
+                    data: amountarray,
+                    borderColor: "#121212"
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: "Proportion invested in US Equities based on company",
+                    fontColor: "#CDCDCD",
+                    fontFamily: "Helvetica",
+                    fontSize: 20,
+                },
+                legend: {
+                    labels: {
+                        fontColor: "#CDCDCD",
+                        fontSize: 12,
+                        fontFamily: "Helvetica",
+                        fontStyle: "bold",
+                        render: "percentage"
+                    }
+                },
+            }
+        });
+
+    </script>
+    <script>
+        var stockchart = document.getElementById('stockchart');
+        stockchart.height = 280
+        var portfolio = JSON.parse(document.getElementById('portfoliodetails').innerHTML)
+        stockArray = []
+        tickerarray = []
+        colors = []
+        // The available hex options
+        var hex = ['a', 'b', 'c', 'd', 'e', 'f', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        var color = '#';
+        for (i in portfolioDetails) {
+            var name = portfolio[i]['equityname']
+            var stockticker = portfolio[i]['stockticker']
+            var totalshare = portfolio[i]['totalshare']
+            var info = name, stockticker
+            stockArray.push(totalshare)
+            tickerarray.push(info)
+            var letter = '0123456789ABCDEF';
+            var sign = '#';
+            for (var i = 0; i < 6; i++) {
+                sign += letter[Math.floor(Math.random() * 11)];
+            }
+            colors.push(sign)
+            var totalsum = stockArray.reduce(function (a, b) {
+                return a + b;
+            }, 0)
+            document.getElementById('totalshareamount').innerHTML = totalsum + " shares owned."
+        }
+        console.log(color)
+        console.log(amountarray)
+        new Chart(document.getElementById("stockchart"), {
+            type: 'pie',
+            data: {
+                labels: tickerarray,
+                datasets: [{
+                    label: "",
+                    backgroundColor: colors,
+                    data: stockArray,
+                    borderColor: "#121212"
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: 'Proportion of shares owned in US Equities based on company',
+                    fontColor: "#CDCDCD",
+                    fontFamily: "Helvetica",
+                    fontSize: 20,
+                },
+                legend: {
+                    labels: {
+                        fontColor: "#CDCDCD",
+                        fontSize: 12,
+                        fontFamily: "Helvetica",
+                        fontStyle: 'bold',
+                    }
+                },
+            }
+        });
+
+    </script>
+    <script>
+        var sector = document.getElementById('sectorchart');
+        var portfoliosector = JSON.parse(document.getElementById('sectorportdetails').innerHTML)
+        console.log(portfoliosector)
+        sectorArray = []
+        sectorValueArray = []
+        coloridentifier = []
+        // The available hex options
+        var hex = ['a', 'b', 'c', 'd', 'e', 'f', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
+        var color = '#';
+        for (i in portfoliosector) {
+            var sector = portfoliosector[i]['sector']
+            var valuesector = portfoliosector[i]['totalamount']
+            sectorArray.push(sector)
+            sectorValueArray.push(valuesector / 100)
+            var hexkey = '0123456789ABCDEF';
+            var key = '#';
+            for (var i = 0; i < 6; i++) {
+                key += hexkey[Math.floor(Math.random() * 11)];
+            }
+            coloridentifier.push(key)
+        }
+        console.log(sectorArray)
+        console.log(sectorValueArray)
+        document.getElementById('totalamountofsector').innerHTML = sectorArray.length + " sectors you have invested in."
+        new Chart(document.getElementById("sectorchart"), {
+            type: 'pie',
+            data: {
+                labels: sectorArray,
+                datasets: [{
+                    label: "",
+                    backgroundColor: coloridentifier,
+                    data: sectorValueArray,
+                    borderColor: "#121212"
+                }]
+            },
+            options: {
+                title: {
+                    display: true,
+                    text: 'Proportion invested in US Equities based on sector',
+                    fontColor: "#CDCDCD",
+                    fontFamily: "Helvetica",
+                    fontSize: 20,
+                },
+                legend: {
+                    labels: {
+                        fontColor: "#CDCDCD",
+                        fontSize: 12,
+                        fontFamily: "Helvetica",
+                        fontStyle: 'bold',
+                    }
+                },
+            }
+        });
+
+    </script>
+</body>
+
+</html>
+{% endblock %}

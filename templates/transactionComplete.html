@@ -1,0 +1,127 @@
+{% extends 'nav.html' %}
+
+{% block content %}
+<html>
+<style>
+    .imgus {
+        width: 100%;
+        height: 100%;
+        border: 1px solid black;
+    }
+
+    h3,
+    h5 {
+        font-family: Helvetica;
+    }
+
+    .button {
+        display: inline-block;
+        background: #202020;
+        color: #CDCDCD;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        font-family: Helvetica;
+    }
+
+    * {
+        color: #CDCDCD;
+    }
+</style>
+<link rel="stylesheet" href="{{ url_for('static', filename='css/mystyle.css') }}">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+<head>
+    <style>
+        .icon {
+            display: inline-block;
+            float: left;
+        }
+
+        .button-container form,
+        .button-container form div {
+            display: inline;
+        }
+
+        .button-container button {
+            display: inline;
+            vertical-align: middle;
+        }
+        #h5item{
+       text-align: center;
+   }
+   .vertical-align{
+    margin: 0;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  -ms-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+   }
+    </style>
+</head>
+
+<body>
+{% if totalAmount < 3500000 %}
+    <div class="container">
+        <div class="row">
+            <div class="col">
+                <br>
+                <div class="icon">
+                    <i class="fa fa-check text-success fa-2x" aria-hidden="true"></i>
+                </div>
+                <h3><strong>Your investment order has been sent.</strong></h3>
+                <br>
+                <h5>Your investment item : {{transferRemarks}}</h5>
+                <br>
+                <h5>Total amount you have invested: SGD${{totalAmount}}</h5>
+                <br>
+                <h5>Total units purchased: {{amountOfStock}}</h5>
+                <br>
+                <h5>Your account number you used to purchase: {{id}}</h5>
+                <br>
+                <h7>Do check if your transaction is recorded.</h7>
+                <br>
+                <br>
+                <div class="button-container" style="align-items: center;">
+                    <form action="USEquities" method="GET">
+                        <button class="btn button" type="submit"> Back to Equity Page</button>
+                    </form>
+                    <form action="user" method="GET">
+                        <button class="btn button" type="submit"> View Transactions </button>
+                    </form>
+                </div>
+                <br>
+                <br>
+                <br>
+                <br>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="container">
+        <div class="row">
+            
+            <div class="col">
+                <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+            <h5 id = "h5item">Your transaction amount is too big. Consider buying less.</h5>
+            <div class="buttonholder">
+                <div class = "vertical-align">
+                <form action="USEquities" method="GET">
+                    <button class="btn button" type="submit"> Back to Equity Page</button>
+                </form>
+            </div>
+            </div>
+            <br>
+                <br>
+                <br>
+                <br>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+</body>
+
+</html>
+{% endblock %}

@@ -1,10 +1,12 @@
-from flask import Flask, render_template, redirect, url_for,request,session
+from flask import Flask, render_template, redirect, url_for,request,session,json
 from datetime import date, timedelta, datetime
 from datetime import datetime
 import requests
 import json
 from requests.auth import HTTPBasicAuth
 from requests_oauthlib import OAuth2Session
+import random
+import string
 
 #py script. add in your codes here. default page is index so when you run on 127.0.0.1:5000, do include the route at the back.
 #For example, on browser, 127.0.0.1:5000/
@@ -18,6 +20,9 @@ tokenurl = 'https://apm.tp.sandbox.fidorfzco.com/oauth/token'
 redirecturl = "http://localhost:5000/callback"
 app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=365)
 #Main 
+@app.before_request
+def make_session_permanent():
+    session.permanent = True
 @app.route("/index", methods = ['GET'])
 def index():
     return render_template("index.html")
@@ -36,15 +41,12 @@ def USEquities():
     {"Name" : "Visa", "Symbol" : "V", "image": "https://pbs.twimg.com/media/EnrGEFNVgAEim2T?format=jpg&name=small", "Industry" : "Credit Services"},
     {"Name": "Intel", "Symbol" : "INTC", "image": "https://pbs.twimg.com/media/EnrGdrDUUAAw1i3?format=jpg&name=small", "Industry" : "Semiconductors" },
     {'Name': "Oracle Corporation","Symbol" : "ORCL" , "image": "https://pbs.twimg.com/media/EnrGrIZVQAIVEY2?format=jpg&name=small" , "Industry" : "Software Infrastructure"}]
+    print(session)
     return render_template("usequity.html",usequitylist = tickerCodes)
 #Shows the equity info plus, routing for the pages, uses 2 alphavantage + 1 outside API
-@app.route("/usequityinfo", methods = ['GET', 'POST'])
-def usequityinfo():
-    try:
-        stockticker = request.form['stockticker']
-        industrytype = request.form['industry']
-        url = "https://www.alphavantage.co/query?apikey=IXYARDFBT1Y30V7J&function=OVERVIEW&symbol=" + stockticker
-        pricingurl = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol="+stockticker+"&interval=5min&apikey=IXYARDFBT1Y30V7J"
+def callEquity(stockticker):
+        url = "https://www.alphavantage.co/query?apikey=IXYARDFBT1Y30V7J&function=OVERVIEW&symbol="+stockticker
+        pricingurl = "https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol="+stockticker+"&interval=1min&apikey=IXYARDFBT1Y30V7J"
         fxurl = "https://api.exchangeratesapi.io/latest?base=USD"
         payload = {}
         headers= {}
@@ -55,13 +57,18 @@ def usequityinfo():
         pricesdic = json.loads(pricingdata.text)
         fxrate = json.loads(fxresponse.text)    
         lastrefreshed = pricesdic["Meta Data"]["3. Last Refreshed"]
-        pastprices = pricesdic["Time Series (5min)"][lastrefreshed]
-        sgd = fxrate['rates']["SGD"]
+        pastprices = pricesdic["Time Series (1min)"][lastrefreshed]
+        for v in pastprices:
+            print(v)
+            print(pastprices[v])
+            pastprices[v] = round(float(pastprices[v]),2)
+        sgd = round(float(fxrate['rates']["SGD"]),2)
         sgdrate = sgd
         currentprice = pastprices["4. close"]
-        currentpriceint = float(currentprice)
-        totalvalue = sgdrate*currentpriceint
-        marketcap = round(float(eqdata['MarketCapitalization']) , 2)
+        currentpriceint = round(float(currentprice),2)
+        valuetoberounded = sgdrate*currentpriceint
+        totalvalue = round(valuetoberounded,2)
+        marketcap = int(round(round(float(eqdata['MarketCapitalization']) , 2)/1000000000,2))
         trailingPE = round(float(eqdata['TrailingPE']) , 2)
         forwardPE = round(float(eqdata['ForwardPE']) , 2)
         pegRatio = round(float(eqdata['PEGRatio']) , 2)
@@ -76,20 +83,20 @@ def usequityinfo():
         eneb = round(float(eqdata['EVToEBITDA']),2)
         envrev = round(float(eqdata['EVToRevenue']) ,2)
         revpershare = round(float(eqdata['RevenuePerShareTTM']),2)
-        grossprofit = round(float(eqdata['GrossProfitTTM']),2)
-        ebitda = round(float(eqdata['EBITDA']),2)
+        grossprofit = int(round(round(float(eqdata['GrossProfitTTM']),2)/1000000,2))
+        ebitda = int(round(round(float(eqdata['EBITDA']),2)/1000000 ,2))
         epsttm = round(float(eqdata['DilutedEPSTTM']),2)
         beta = round(float(eqdata['Beta']),2)
         weekhigh = round(float(eqdata['52WeekHigh']),2)
         weeklow = round(float(eqdata['52WeekLow']),2)
         shortma = round(float(eqdata['50DayMovingAverage']) ,2)
         longma = round(float(eqdata['200DayMovingAverage']) ,2)
-        sharesoutstanding = round(float(eqdata['SharesOutstanding']),2)
-        sharesfloat = round(float(eqdata['SharesFloat']),2)
-        sharesshort = round(float(eqdata['SharesShort']),2)
+        sharesoutstanding = int(round(round(float(eqdata['SharesOutstanding']),2)/1000000,0))
+        sharesfloat = int(round(round(float(eqdata['SharesFloat']),2),0)/1000000)
+        sharesshort = int(round(round(float(eqdata['SharesShort']),2),0)/1000000)
         shortratio = round(float(eqdata['ShortRatio']),2)
-        insider = eqdata['PercentInsiders']
-        institutions = eqdata['PercentInstitutions']
+        insider = round(float(eqdata['PercentInsiders']),2)
+        institutions = round(float(eqdata['PercentInstitutions']),2)
         forwardannualdividendrate = round(float(eqdata['ForwardAnnualDividendRate']))
         forwardannualdividendyield = round(float(eqdata['ForwardAnnualDividendYield']))
         payoutratio = round(float(eqdata['PayoutRatio']))
@@ -97,35 +104,71 @@ def usequityinfo():
         exdivdate = eqdata['ExDividendDate']
         lastsplitfactor = eqdata['LastSplitFactor']
         lastsplitdate = eqdata['LastSplitDate']
-        historic = "https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol="+stockticker+"&apikey=RU0OE9SIH6R38HXY"
+        checker = "False"
+        if not session.get("watchList") is None:
+            checker = "False"
+            sessionwatchlist = session['watchList']
+            for i in range(0, len(sessionwatchlist)):
+                print(i)
+                print(sessionwatchlist[i])
+                if sessionwatchlist[i]['stockticker'] == stockticker:   
+                    checker = True
+                    checker = str(checker)
+                    break
+            else:
+                checker = False
+                checker = str(checker)
+                print(checker+ "item does not exist")
+        incomestatementurl = "https://financialmodelingprep.com/api/v3/income-statement/"+stockticker+"?limit=120&apikey=9496cb244ba6da3d33f1f7f6f234e387"
+        incomestatementresponse = requests.request('GET', incomestatementurl, headers = headers, data = payload)
+        incomestatementdic = json.loads(incomestatementresponse.text)
+        for i in reversed(range(len(incomestatementdic))):
+            if i < 5:
+                 pass
+            else:
+                del incomestatementdic[i]
+        for i in range(len(incomestatementdic)):
+            for k,v in incomestatementdic[i].items():
+                if k != "eps" and k!= "epsdiluted" and k!= "link" and k!= "finalLink" and k != "symbol" and k!= "fillingDate" and k!= "acceptedDate" and k!= "date" and k!= "period" :
+                    v = v/1000000
+                    v = int(v)
+                    incomestatementdic[i][k] = v
+        balancesheeturl = "https://financialmodelingprep.com/api/v3/balance-sheet-statement/"+stockticker+"?limit=120&apikey=9496cb244ba6da3d33f1f7f6f234e387"
+        balancesheetresponse = requests.request('GET', balancesheeturl, headers = headers , data = payload)
+        balancesheetdic = json.loads(balancesheetresponse.text)
+        for i in reversed(range(len(balancesheetdic))):
+            if i > 4:
+                del balancesheetdic[i]
+        for i in range(len(balancesheetdic)):
+            for k,v in balancesheetdic[i].items():
+                if k!= "link" and k!= "finalLink" and k != "symbol" and k!= "fillingDate" and k!= "acceptedDate" and k!= "date" and k!= "period":
+                    v = v/1000000
+                    v = int(v)
+                    balancesheetdic[i][k] = v
+        cashflowurl = "https://financialmodelingprep.com/api/v3/cash-flow-statement/"+stockticker+"?limit=120&apikey=9496cb244ba6da3d33f1f7f6f234e387"
+        cashflowresponse = requests.request('GET', cashflowurl, headers = headers , data = payload)
+        cashflowdic = json.loads(cashflowresponse.text)
+        for i in reversed(range(len(cashflowdic))):
+            if i > 4:
+                del cashflowdic[i]
+        for i in range(len(cashflowdic)):
+            for k,v in cashflowdic[i].items():
+                if k!= "link" and k!= "finalLink" and k != "symbol" and k!= "fillingDate" and k!= "acceptedDate" and k!= "date" and k!= "period":
+                    v = v/1000000
+                    v = int(v)
+                    cashflowdic[i][k] = v
+        historic = "https://www.alphavantage.co/query?function=TIME_SERIES_WEEKLY&symbol="+stockticker+"&apikey=ELNT38TEYXQOL7WS"
         historicresponse = requests.request("GET", historic, headers=headers, data=payload)
         historicdata = json.loads(historicresponse.text)
-        cleanedhistoric = historicdata['Time Series (Daily)']
-        print(cleanedhistoric)
-        for k, v in cleanedhistoric.items():
-            print(k)
-            print(v["1. open"])
-        incomeurl = "https://www.alphavantage.co/query?function=INCOME_STATEMENT&symbol="+stockticker+"&apikey=RU0OE9SIH6R38HXY"
-        incomeresponse = requests.request("GET", incomeurl, headers=headers, data = payload)
-        incomestatement = json.loads(incomeresponse.text)
-        incomestatementdic = incomestatement['annualReports']
-        for i in range(0,5):
-            for k,v in incomestatementdic[i].items():
-                if v != "None" and k != "fiscalDateEnding" and v != "0" and k!= "reportedCurrency":
-                    v = v[:-3]
-                    v = int(v)
-                    v = "{:,}".format(v)
-                    print(v)
-                    incomestatementdic[i][k] = v
-                else:
-                    pass
-        print(incomestatementdic)
-        balanceurl = "https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol="+stockticker+"&apikey=RU0OE9SIH6R38HXY"
-        balanceresponse = requests.request('GET', balanceurl, headers = headers, data = payload)
-        balancesheet = json.loads(balanceresponse.text)
-        balancesheetdic = balancesheet['annualReports']
-        generalnewsurl = "https://stocknewsapi.com/api/v1/category?section=general&items=50&token=6x0ns49l6v9xchu3rltziknbiogcyaltdljm8oee"
-        stocknewsurl = "https://stocknewsapi.com/api/v1?tickers="+stockticker+"&items=50&token=6x0ns49l6v9xchu3rltziknbiogcyaltdljm8oee"
+        cleanedhistoric = historicdata['Weekly Time Series']
+        for k,v in cleanedhistoric.items():
+            v['1. open'] = round(float(v['1. open']),2)
+            v['2. high'] = round(float(v['2. high']),2)
+            v['3. low'] = round(float(v['3. low']),2)
+            v['4. close'] = round(float(v['4. close']),2)
+            v['5. volume'] = int(float(v['5. volume'])/1000000)
+        generalnewsurl = "https://stocknewsapi.com/api/v1/category?section=general&items=5&token=ou8oq2qc8dlnl3v5ejansi6fcp0msblaqluzzg8j"
+        stocknewsurl = "https://stocknewsapi.com/api/v1?tickers="+stockticker+"&items=5&token=ou8oq2qc8dlnl3v5ejansi6fcp0msblaqluzzg8j"
         generalnewsresponse = requests.request("GET", generalnewsurl, headers=headers, data=payload)
         stocknewsresponse = requests.request('GET', stocknewsurl, headers = headers, data = payload)
         generalnewsdic = json.loads(generalnewsresponse.text)
@@ -133,42 +176,41 @@ def usequityinfo():
         cleanednews = generalnewsdic['data']
         stocknews = stocknewdic['data']
         print(cleanednews)
+        for i in stocknews:
+            i['date'] = i['date'][:-14]
+        for i in cleanednews:
+             i['date'] = i['date'][:-14]
         return render_template ('usequityinfo.html', pricesdic = pricesdic, pastprices = pastprices, eqdata = eqdata, sgd = sgd, 
-        totalvalue = totalvalue, industry = industrytype,operatingmargin  = operatingmargin ,profitmargin = profitmargin, returnonasset = returnonasset, returnonequity = returnonequity,
+        totalvalue = totalvalue, operatingmargin  = operatingmargin ,profitmargin = profitmargin, returnonasset = returnonasset, returnonequity = returnonequity,
         quarterlyrevenuegrowth = quarterlyrevenuegrowth, quarterlyearningsgrowth = quarterlyearningsgrowth, insider = insider, 
         institutions = institutions, trailingPE = trailingPE, forwardPE = forwardPE, pegRatio = pegRatio, pricetosales = pricetosales,
         pricetobook = pricetobook, enrev = envrev, eneb = eneb, revpershare = revpershare, gp = grossprofit, ebitda = ebitda,
         epsttm = epsttm, beta = beta, weekhigh = weekhigh, weeklow = weeklow, shortma = shortma, longma = longma, sharesoutstanding = sharesoutstanding,
         sharesfloat = sharesfloat, sharesshort = sharesshort, shortratio = shortratio, forwardannualdividendyield = forwardannualdividendyield, 
         forwardannualdividendrate = forwardannualdividendrate, payoutratio = payoutratio, divdate = divdate, exdivdate = exdivdate, 
-        lastsplitdate = lastsplitdate, lastsplitfactor = lastsplitfactor, marketcap = marketcap,historicdata = cleanedhistoric, incomestatement = incomestatementdic,
-        balancesheetdic = balancesheetdic, generalnewsdic = cleanednews, stocknews = stocknews)
-    except KeyError:
-        print(eqdata)
-        return "MAX API Calling"
-   
-@app.route('/usbalancesheet', methods = ['GET', 'POST'])
-def balancesheet():
-    try:
-        balancesheet = ['1']
-        stockticker = request.form['stockticker']
-        equityname = request.form['equityname']
-        industry = request.form['industry']
-        url = "https://www.alphavantage.co/query?function=BALANCE_SHEET&symbol="+stockticker+"&apikey=RU0OE9SIH6R38HXY"
-        payload={}
-        headers = {}
-        response = requests.request("GET", url, headers=headers, data=payload)
-        balancesheetdata = json.loads(response.text)
-        balancesheetreport = balancesheetdata['annualReports']
+        lastsplitdate = lastsplitdate, lastsplitfactor = lastsplitfactor, marketcap = marketcap, historic = cleanedhistoric, checker = checker,
+        incomestatementdic = incomestatementdic, balancesheetdic = balancesheetdic, cashflowdic = cashflowdic,generalnewsdic = cleanednews, stocknews=stocknews,)
 
-        print(balancesheetdata)
-        for k, v in balancesheetreport.items():
-            print(k)
-            print(v)
-        return render_template('usbalancesheet.html', balancesheet = balancesheet, stockticker = stockticker , equityname = equityname , 
-        industry = industry)
+@app.route("/usequityinfo", methods = ['GET', 'POST'])
+def usequityinfo():
+    stockticker = request.form['stockticker']
+    return callEquity(stockticker)
+@app.route("/search", methods = ['GET','POST'])
+def searchinfo():
+    try:
+        searchticker = request.form['search']
+        searchurl = "https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords="+searchticker+"&apikey=RU0OE9SIH6R38HXY"
+        headers = {}
+        payload = {}
+        searchresponse = requests.request('GET', searchurl, headers = headers, data = payload)
+        searchresult = json.loads(searchresponse.text)
+        searchticker = searchresult['bestMatches'][0]["1. symbol"]
+        return callEquity(searchticker)
+    except IndexError:
+        return "Bad Search result"
     except KeyError:
-        return "MAX API CALLING"
+        return "MAX API Calling."
+@app.route('/', methods = ['GET'])
 @app.route('/default', methods = ['GET', 'POST'])
 def default():
     fidor = OAuth2Session(clientid,redirect_uri=redirecturl)
@@ -191,7 +233,7 @@ def callback():
     auth = HTTPBasicAuth(clientid, clientsecret)
     token = fidor.fetch_token(tokenurl, auth = auth, code = authorizationcode, body = body, method = "POST")
     session['oauth_token'] = token
-    return redirect(url_for('.user')) 
+    return redirect(url_for('.index')) 
 @app.route('/user', methods = ['GET'])
 def user():
     try:
@@ -235,8 +277,8 @@ def user():
         for item in transcclean:
             item['amount'] = item['amount']/100
             item['transaction_type'] = item['transaction_type'].capitalize()
-            item['booking_date'] = item['booking_date'][:-15]
-            item['value_date'] = item['value_date'][:-15]
+            item['subject'] = item['subject'][61:]
+            item['updated_at'] = item['updated_at'][:-10]
         currentuserurl = "https://api.tp.sandbox.fidorfzco.com/users/current"
 
         payload={}
@@ -254,3 +296,143 @@ def user():
     except KeyError:
         print("key error")
         return redirect(url_for('index'))
+@app.route('/buy',methods= ['POST'])
+def buy():
+    if request.method == "POST":
+        token = session['oauth_token']
+        print(token)
+        customerAccount = session['fidor_cust']
+        customerDetails = customerAccount['data'][0]
+        print(customerDetails)
+        fidorID = customerDetails['id']
+        customerEmail = "studentB17@email.com"
+        amountOfStock = int(request.form['amount'])
+        equityname = request.form['equityname']
+        stockticker = request.form['stockticker']
+        print(amountOfStock)
+        print(request.form['priceinsgd'])
+        transferAmount=int(float(request.form['priceinsgd'])*100)
+        print(transferAmount)
+        totalAmount = int(amountOfStock*transferAmount)
+        transferRemarks = "Purchase of " + equityname + " (" + stockticker +")"
+        letters = string.ascii_lowercase
+        transferRandomNumeric = ''.join(random.choice(letters) for i in range(10))
+        if totalAmount < 3500000:
+            url = "https://api.tp.sandbox.fidorfzco.com/internal_transfers"
+
+            payload="{\r\n    \"account_id\" : \""+fidorID+"\",\r\n    \"receiver\": \""+customerEmail+"\",\r\n    \"external_uid\" : \""+transferRandomNumeric+"\",\r\n    \"amount\" : \""+str(totalAmount)+"\",\r\n    \"subject\" : \""+transferRemarks+"\"\r\n}"
+            headers = {
+            'Authorization': 'Bearer ' + token['access_token'],
+            'Accept': 'application/vnd.fidor.de;version=1;text/json',
+            'Content-Type': 'application/json',
+            'Cookie': 'session_token=a1945e8081f5c2c9a1aa5637462f2e469fbeb0dc; account=IntcImFjY291bnRcIjp7XCJhY2NvdW50X25vXCI6MzczNzgxNDIsXCJmaXJzdG5hbWVcIjpcIkN1c3RvbWVyXCIsXCJsYXN0bmFtZVwiOlwiQiBPTkVcIixcInRpdGxlXCI6bnVsbCxcImFkcl9zdHJlZXRcIjpcIlJvdGtlaGxjaGVuc3RyLlwiLFwiYWRyX3N0cmVldF9uclwiOlwiNjRiXCIsXCJhZHJfemlwXCI6XCIyMjg1MVwiLFwiYWRyX2NpdHlcIjpcIk5vcmRlcnN0ZWR0XCIsXCJhZHJfY291bnRyeVwiOlwiREVcIixcImFkcl9waG9uZVwiOm51bGwsXCJhZHJfbW9iaWxlXCI6bnVsbCxcImFkcl9mYXhcIjpudWxsLFwiYmlydGhkYXlcIjpcIjE5OTYtMDQtMzBcIixcImZvcmVpZ25fYWNjb3VudF9ub1wiOlwiNDQxNDQ5ODI0M1wiLFwiZW1haWxfZW1haWxcIjpcImN1c3RvbWVyYjFAZXhhbXBsZS5jb21cIixcImlzX2NvcnBvcmF0ZVwiOmZhbHNlLFwicGhvdG9cIjpudWxsLFwicHJlZmVycmVkX2xhbmd1YWdlXCI6bnVsbH19Ig%3D%3D--28309c9cf0e588e7d51ff4e38dc365860219f682'
+            }
+            response = requests.request("POST", url, headers=headers, data=payload)
+            transactiondetails = json.loads(response.text)
+            print(response.text + "process")
+            new_data = {"stockticker" : stockticker, "equityname" : equityname, "totalamount" : totalAmount, "totalshare" : amountOfStock}
+            if session.get("portfolio") is None:
+                data = []
+                data.append(new_data)
+                session["portfolio"] = data
+            else:
+                currentport = session['portfolio']
+                for i in currentport:
+                    print(i['stockticker'])
+                    if i['stockticker'] == stockticker:
+                        totalIntToAdd = int(i['totalamount']) + int(totalAmount)
+                        totalStockToAdd = int(i['totalshare']) + int(amountOfStock)
+                        i['totalamount'] = totalIntToAdd
+                        i['totalshare'] = totalStockToAdd
+                        break
+                else:
+                    new_data_copy = new_data.copy()
+                    currentport.append(new_data_copy)
+                    session['portfolio'] = currentport
+                    print(session['portfolio'])
+            sector = request.form['sector']
+            sector_data = {"sector" : sector, "totalamount" : totalAmount}
+            if session.get("sectorportfolio") is None:
+                sectordata = []
+                sectordata.append(sector_data)
+                session["sectorportfolio"] = sectordata
+            else:
+                sectorport = session['sectorportfolio']
+                for i in sectorport:
+                    if i['sector'] == sector:
+                        totalAdd = int(i['totalamount']) + int(totalAmount)
+                        i['totalamount'] = totalAdd
+                        break
+                else:
+                    sector_data_copy = sector_data.copy()
+                    sectorport.append(sector_data_copy)
+                    session['sectorportfolio'] = sectorport
+                    print(session)
+            totalAmountdisplay = totalAmount/100
+            return render_template("transactionComplete.html", transferRemarks = transferRemarks, totalAmount= totalAmountdisplay, id =customerDetails['account_number'], amountOfStock = amountOfStock)
+        else:
+            return render_template("transactionComplete.html" , totalAmount =totalAmount)
+@app.route('/addToWishList', methods = ['POST'])
+def addToWishList():
+    stockticker = request.form['stocksymbol']
+    equityname = request.form['equityname']
+    new_data = {"stockticker" : stockticker , "equityname" : equityname}
+    #ensuring that the session is empty then, add new value
+    if session.get("watchList") is None:
+        data = []
+        data.append(new_data)
+        session['watchList'] = data
+    else:
+        currentwatch = session['watchList']
+        print(currentwatch)
+        new_data_copy = new_data.copy()
+        currentwatch.append(new_data_copy)
+        session['watchList'] = currentwatch
+        print(session['watchList'])
+    return towatchlist()
+@app.route("/openfromwatchlist", methods=["POST"])
+def openfromwatchlist():
+    stockticker = request.form['stockticker']
+    return callEquity(stockticker)
+@app.route("/removeFromWishlist", methods = ['POST'])
+def removeFromWishlist():
+    removing = session['watchList']
+    stockticker = request.form['stocksymbol']
+    for i in range (len(removing)):
+        if removing[i]['stockticker'] == stockticker:
+            del removing[i]
+            break
+    session['watchList'] = removing
+    print(removing)
+    return towatchlist()
+@app.route("/watchlist", methods = ['GET'])
+def watchlist():
+    return towatchlist()
+def towatchlist():
+    userWatchlist = session['watchList']
+    watchlist = []
+    for i in userWatchlist:
+        print(i)
+        watchlist.append(i)
+        print(watchlist)
+    if len(watchlist) == 0:
+        check = "True"
+    else:
+        check = "False"
+    print(check)
+    return render_template('viewWatchlist.html',watchlist = watchlist, check = check)
+@app.route("/portfolio", methods = ['GET'])
+def portfolio():
+    userportfolio = session['portfolio']
+    portfolio = []
+    for i in userportfolio:
+        print(i)
+        portfolio.append(i)
+        print(portfolio)
+    sectorportfolio = session['sectorportfolio']
+    sectorport = []
+    for i in sectorportfolio:
+        print(i)
+        sectorport.append(i)
+        print(sectorportfolio)
+    return render_template('viewPortfolio.html', portfolio = json.dumps(portfolio), sectorport = json.dumps(sectorport))

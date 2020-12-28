@@ -18,8 +18,9 @@
         h3,
         p,
         th,
-        td {
+        td,h6,h4 {
             font-family: Helvetica;
+            color: #CDCDCD;
         }
 
         .topnav {
@@ -49,44 +50,76 @@
         .news {
             float: right;
         }
+
         .newsimage {
             float: left;
         }
+
+        .moveRight {
+            margin: 0 2px;
+        }
+
+        /* td{
+            font-size: small;
+        } */
+        .watchbtn{
+            background: #202020;
+            color: #CDCDCD;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+            font-family: Helvetica;
+        }
+        .buybutton{
+            text-align: center;
+            width: 50%;
+        }
     </style>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/mystyle.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
 </head>
-<script>
-    function changeicon() {
-        console.log('test')
-        console.log(document.getElementById('righticon').className)
-        if (document.getElementById('righticon').className == "fa fa-chevron-right clickable" || document.getElementById('righticon').className == "fa fa-chevron-right clickable collapsed") {
-            document.getElementById('righticon').className = "fa fa-chevron-down clickable"
-        } else if (document.getElementById('righticon').className = "fa fa-chevron-down clickable") {
-            document.getElementById('righticon').className = "fa fa-chevron-right clickable"
-        }
-    }
-</script>
 
 <body>
-
-
+    <h1 hidden id="stocktickerforchart">{{eqdata['Symbol']}}</h1>
     <div class="container">
         <div class="row">
             <div class="col">
+                <br>
                 <h3 class="font-weight-bold">{% block title %}{{eqdata['Name']}} ({{eqdata['Symbol']}}){% endblock %}
                 </h3>
-                <h3 class="font-weight-bold">{{pastprices['4. close']}}
-                </h3>
+                <h4>Current trading volume: {{pastprices['5. volume']}}</h4>
+                <button type="submit" class="btn btn-light" data-target="#exampleModal" data-toggle="modal"
+                    style="color: #121212; padding: 14px 16px;">Trade</button>
+                    {% if checker == "False" %}
+                <form action="addToWishList" method="POST">
+                    <input type="hidden" value="{{eqdata['Name']}}" name="equityname">
+                    <input type="hidden" value="{{eqdata['Symbol']}}" name="stocksymbol">
+                    <br>
+                    <button type="submit" class="btn watchbtn" style="background-color: #202020;">Add to
+                        watchlist</button>
+                </form>
+                {% else %}
+                <form action="removeFromWishlist" method="POST">
+                    <input type="hidden" value="{{eqdata['Name']}}" name="equityname">
+                    <input type="hidden" value="{{eqdata['Symbol']}}" name="stocksymbol">
+                    <br>
+                    <button type="submit" class="btn watchbtn" style="background-color: #202020;">Remove from
+                        watchlist</button>
+                </form>
+                {% endif %}
+                    <br>
                 <!-- MINI NAV BAR -->
                 <div class="topnav">
-                    <button class="tablink btn" onclick="openpage('summary', this)" id="defaultOpen">Summary</button>
-                    <button class="tablink btn" onclick="openpage('financialstatement', this )">Financial
+                    <button class="tablink btn" onclick="openpage('summary', this,'#212121')"
+                        id="defaultOpen">Summary</button>
+                    <button class="tablink btn" onclick="openpage('financialstatement', this,'#212121' )">Financial
                         Statements</button>
-                    <button class="tablink btn" onclick="openpage('profile', this)">Profile</button>
-                    <button class="tablink btn" onclick="openpage('financialratio', this)">Financial Ratios</button>
-                    <button class="tablink btn" onclick="openpage('historicaldata', this)">Historical Data</button>
-                    <button class="tablink btn" onclick="openpage('news', this)">News</button>
+                    <button class="tablink btn" onclick="openpage('profile', this,'#212121')">Profile</button>
+                    <button class="tablink btn" onclick="openpage('financialratio', this,'#212121')">Financial
+                        Ratios</button>
+                    <button class="tablink btn" onclick="openpage('historicaldata', this,'#212121')">Historical
+                        Data</button>
+                    <button class="tablink btn" onclick="openpage('news', this,'#212121')">News</button>
                 </div>
             </div>
         </div>
@@ -94,25 +127,19 @@
 
 
     <!-- SUMMARY PAGE -->
-    <div class="container">
+    <div class="container tabcontent" id = "summary">
         <div class="row">
-            <div class="col-sm-6 tabcontent" id="summary">
+            <div class="col-sm-6">
+                <br>
                 <div class="stocktable">
                     <p>Asset Type: {{eqdata['AssetType']}}</p>
                     <p>Exchange: {{eqdata['Exchange']}}</p>
-                    <p>Current Price: {{pastprices['4. close']}}</p>
-                    <p>Industry: {{industry}}</p>
+                    <p>Current Price: USD${{pastprices['4. close']}}</p>
                     <table class="table table-sm">
                         <tbody>
                             <tr>
                                 <th scope="row">PE Ratio</th>
                                 <td>{{eqdata['PERatio']}}</td>
-                                <th scope="row">PEG Ratio</th>
-                                <td>{{eqdata['PEGRatio']}}</td>
-                            </tr>
-                            <tr>
-                                <th scope="row">EPS</th>
-                                <td>{{eqdata['EPS']}}</td>
                                 <th scope="row">EPS</th>
                                 <td>{{eqdata['EPS']}}</td>
                             </tr>
@@ -129,150 +156,164 @@
                                 <td>{{eqdata['DividendPerShare']}}</td>
                             </tr>
                             <tr>
-                                <th scope="row">P/B Ratio</th>
-                                <td>{{eqdata['PriceToBookRatio']}}</td>
-                                <th scope="row">Profit Margin</th>
-                                <td>{{eqdata['ProfitMargin']}}</td>
+                                <th scope="row">Open</th>
+                                <td>{{pastprices['1. open']}}</td>
+                                <th scope="row">High</th>
+                                <td>{{pastprices['2. high']}}</td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Low</th>
+                                <td>{{pastprices['3. low']}}</td>
+                                <th scope="row">Close</th>
+                                <td>{{pastprices['4. close']}}</td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
+            </div>
+            <div class="col-sm-6">
                 <br>
-                <button type="submit" class="btn btn-primary" data-target="#exampleModal"
-                    data-toggle="modal">Trade</button>
+                <div id="chart"></div>
             </div>
         </div>
     </div>
-
-
-
-
-
+    <script src="{{url_for('static', filename = 'js/chart.js')}}"></script>
     <!-- FINANCIAL STATEMENTS PAGE -->
     <div class="container tabcontent" id="financialstatement">
         <div class="row">
             <div class="col">
                 <div class="topnav">
                     <br>
-                    <button class="tablink btn" onclick="openpage('financialstatement', this)">Income Statement</button>
-                    <button class="tablink btn" onclick="openpage('balance', this)">Balance Sheet</button>
-                    <button class="tablink btn" onclick="openpage('cashflow', this)">Cash Flow</button>
+                    <button class="tablink btn active" onclick="openpage('financialstatement', this,'#CDCDCD')">Income
+                        Statement</button>
+                    <button class="tablink btn" onclick="openpage('balance', this,'#CDCDCD')">Balance Sheet</button>
+                    <button class="tablink btn" onclick="openpage('cashflow', this,'#CDCDCD')">Cash Flow</button>
                 </div>
                 <br>
-                <table class="table table-bordered">
+                <h5><strong>Income Statement</strong></h5>
+                <p style="font-family : Helvetica; color: #CDCDCD;">Numbers are measured in millions.</p>
+                <table class="table">
                     <thead>
                         <tr>
                             <th scope="col">Breakdown</th>
-                            {% for i in range (0, 5 )%}
-                            <th scope="col" style="text-align: center;">{{incomestatement[i]['fiscalDateEnding']}}</th>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <th style="text-align: center;">{{incomestatementdic[i]['date']}}</th>
                             {% endfor %}
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>Total Revenue</td>
-                            {% for i in range (0, 5 )%}
-                            <td style="text-align: center;">{{incomestatement[i]['totalRevenue']}}</td>
+                            <td>Total revenue</td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col" style="text-align: center;">{{incomestatementdic[i]['revenue']}}</td>
                             {% endfor %}
                         </tr>
                         <tr>
-                            <td scope="row">Cost of Revenue</td>
-                            {% for i in range (0, 5 )%}
-                            <td style="text-align: center;">{{incomestatement[i]['costOfRevenue']}}</td>
+                            <td>Cost of revenue</td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col" style="text-align: center;">{{incomestatementdic[i]['costOfRevenue']}}</td>
                             {% endfor %}
                         </tr>
                         <tr>
-                            <td scope="row">Gross Profit</td>
-                            {% for i in range (0, 5 )%}
-                            <td style="text-align: center;">{{incomestatement[i]['grossProfit']}}</td>
+                            <td>Gross profit</td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col" style="text-align: center;">{{incomestatementdic[i]['grossProfit']}}</td>
                             {% endfor %}
                         </tr>
                         <tr>
-                            <td scope="row">
-                                <i id="righticon" onclick="changeicon()" class="fa fa-chevron-right clickable"
-                                    aria-hidden="true" data-toggle="collapse" data-target="#group-of-rows-1"
-                                    aria-expanded="false" aria-controls="group-of-rows-1"></i>Operating Expense</td>
-                            {% for i in range (0, 5 )%}
-                            <td style="text-align: center;">{{incomestatement[i]['totalOperatingExpense']}}</td>
-                            {% endfor %}
-                        </tr>
-                        <tr id="group-of-rows-1" class="collapse">
-
-                            <td scope="row">
-                                <p style="margin-left: 30px;">Research and Development</p>
-                            </td>
-                            {% for i in range (0, 5 )%}
-                            <td style="text-align: center;">{{incomestatement[i]['researchAndDevelopment']}}</td>
-                            {% endfor %}
-                        </tr>
-                        <tr id="group-of-rows-1" class="collapse">
-                            <td scope="row">
-                                <p style="margin-left: 30px;">Selling General Administrative</p>
-                            </td>
-                            {% for i in range (0, 5 )%}
-                            <td style="text-align: center;">{{incomestatement[i]['sellingGeneralAdministrative']}}</td>
+                            <td>Research and development</td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col" style="text-align: center;">{{incomestatementdic[i]['researchAndDevelopmentExpenses']}}</td>
                             {% endfor %}
                         </tr>
                         <tr>
-                            <th scope="row">Operating Income</th>
-                            {% for i in range (0,5 )%}
-                            <td style="text-align: center;">{{incomestatement[i]['operatingIncome']}}</td>
+                            <td>Selling general and administrative</td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col" style="text-align: center;">{{incomestatementdic[i]['generalAndAdministrativeExpenses']}}</td>
                             {% endfor %}
                         </tr>
                         <tr>
-                            <td scope="row">Interest Expense</td>
-                            {% for i in range (0, 5 )%}
-                            <td style="text-align: center;">{{incomestatement[i]['interestExpense']}}</td>
+                            <td><strong>Total Operating Expenses</strong></td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col" style="text-align: center;">{{incomestatementdic[i]['operatingExpenses']}}</td>
                             {% endfor %}
                         </tr>
                         <tr>
-                            <td scope="row">Total other Income Expense</td>
-                            {% for i in range (0, 5 )%}
-                            <td style="text-align: center;">{{incomestatement[i]['totalOtherIncomeExpense']}}</td>
+                            <td><strong>Operating Income</strong></td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col" style="text-align: center;">{{incomestatementdic[i]['operatingIncome']}}</td>
                             {% endfor %}
                         </tr>
                         <tr>
-                            <td scope="row">Income before Tax</td>
-                            {% for i in range (0, 5 )%}
-                            <td style="text-align: center;">{{incomestatement[i]['incomeBeforeTax']}}</td>
+                            <td>Interest Expense</td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col" style="text-align: center;">{{incomestatementdic[i]['interestExpense']}}</td>
                             {% endfor %}
                         </tr>
                         <tr>
-                            <td scope="row">Income Tax Expense</td>
-                            {% for i in range (0, 5 )%}
-                            <td style="text-align: center;">{{incomestatement[i]['incomeTaxExpense']}}</td>
+                            <td>Total other income/expenses net</td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col" style="text-align: center;">{{incomestatementdic[i]['totalOtherIncomeExpensesNet']}}</td>
                             {% endfor %}
                         </tr>
                         <tr>
-                            <td scope="row">Net Income from Continuing Operations</td>
-                            {% for i in range (0, 5 )%}
-                            <td style="text-align: center;">{{incomestatement[i]['netIncomeFromContinuingOperations']}}
-                            </td>
+                            <td>Income before tax</td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col" style="text-align: center;">{{incomestatementdic[i]['incomeBeforeTax']}}</td>
                             {% endfor %}
                         </tr>
                         <tr>
-                            <th scope="row">Net Income</th>
-                            {% for i in range (0, 5 )%}
-                            <td style="text-align: center;">{{incomestatement[i]['netIncome']}}</td>
+                            <td>Income tax expense</td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col" style="text-align: center;">{{incomestatementdic[i]['incomeTaxExpense']}}</td>
                             {% endfor %}
                         </tr>
                         <tr>
-                            <td scope="row">Net Income Applicable to Common Shares</td>
-                            {% for i in range (0, 5 )%}
-                            <td style="text-align: center;">{{incomestatement[i]['netIncomeApplicableToCommonShares']}}
-                            </td>
+                            <td>Income from continuing operations</td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col" style="text-align: center;">{{incomestatementdic[i]['netIncome']}}</td>
                             {% endfor %}
                         </tr>
                         <tr>
-                            <td scope="row">Other Non Operating Income </td>
-                            {% for i in range (0,5)%}
-                            <td style="text-align: center;">{{incomestatement[1]['otherNonOperatingIncome']}}
-                                {% endfor %}
+                            <td>Net income</td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col" style="text-align: center;">{{incomestatementdic[i]['netIncome']}}</td>
+                            {% endfor %}
                         </tr>
                         <tr>
-                            <td scope="row">EBIT</td>
-                            {% for i in range (0, 5 )%}
-                            <td style="text-align: center;">{{incomestatement[i]['ebit']}}</td>
+                            <td>Net income available to common shareholders</td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col" style="text-align: center;">{{incomestatementdic[i]['netIncome']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td>Basic EPS</td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col" style="text-align: center;">{{incomestatementdic[i]['eps']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td>Diluted EPS</td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col"  style="text-align: center;">{{incomestatementdic[i]['epsdiluted']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td>Basic Average Shares</td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col" style="text-align: center;">{{incomestatementdic[i]['weightedAverageShsOut']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td>Diluted Average Shares</td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col" style="text-align: center;">{{incomestatementdic[i]['weightedAverageShsOutDil']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td>EBITDA</td>
+                            {% for i in range(0,incomestatementdic|length) %}
+                            <td scope="col" style="text-align: center;">{{incomestatementdic[i]['ebitda']}}</td>
                             {% endfor %}
                         </tr>
                     </tbody>
@@ -285,33 +326,422 @@
             <div class="col">
                 <div class="topnav">
                     <br>
-                    <button class="tablink btn" onclick="openpage('financialstatement', this)">Income Statement</button>
-                    <button class="tablink btn" onclick="openpage('balance', this)">Balance Sheet</button>
-                    <button class="tablink btn" onclick="openpage('cashflow', this)">Cash Flow</button>
+                    <button class="tablink btn" onclick="openpage('financialstatement', this,'#CDCDCD')">Income
+                        Statement</button>
+                    <button class="tablink btn active" onclick="openpage('balance', this,'#CDCDCD')">Balance
+                        Sheet</button>
+                    <button class="tablink btn" onclick="openpage('cashflow', this,'#CDCDCD')">Cash Flow</button>
                 </div>
                 <br>
-                <table class="table table-hover">
+                <h5><strong>Balance Sheet</strong></h5>
+                <p style="font-family : Helvetica; color: #CDCDCD;">Numbers are measured in millions.</p>
+                <table class="table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Breakdown</th>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <th scope="col" style="text-align: center;">{{balancesheetdic[i]['date']}}</th>
+                                {% endfor %}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td scope="row"><strong>Assets</strong></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="color: #121212;">black</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row">
+                                    <div style="margin-left: 10%;">
+                                        <strong>
+                                        Current assets
+                                        </strong>
+                                    </div>
+                                </td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="color: #121212;">black</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><div style = "margin-left: 20%;">Net receivables</div></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['netReceivables']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><div style="margin-left: 20%;">Cash and cash equivalents</div></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['cashAndCashEquivalents']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><div style="margin-left: 20%;">Other short term investment</div></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['shortTermInvestments']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><div style="margin-left: 10%;"><strong>Total current assets</strong></div></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;"> {{balancesheetdic[i]['totalCurrentAssets']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><div style="margin-left : 10%"><strong>Non current assets</strong></div></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="color: #121212;">black</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><div style = "margin-left: 20%;">Property, plant and equipment</div></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['propertyPlantEquipmentNet']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><div style = "margin-left: 20%;">Goodwill</div></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;"> {{balancesheetdic[i]['goodwill']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><div style = "margin-left: 20%;">Intangible assets</div></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['intangibleAssets']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><div style="margin-left:20%">Other non current assets</div></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['otherAssets']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><div style = "margin-left: 10%;"><strong>Total non current assets</strong></div></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['totalNonCurrentAssets']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><strong>Total assets</strong></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['totalAssets']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><strong>Liabilities and stockholder's equity</strong></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="color: #121212;">black</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><strong><div style = "margin-left: 10%;">Liabilities</div></strong></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="color: #121212;">black</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><strong><div style = "margin-left: 20%;">Current liabilities</div></strong></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="color: #121212;">black</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><div style = "margin-left: 30%;">Short term debt</div></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['shortTermDebt']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><div style = "margin-left: 30%;">Account payable</div></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['accountPayables']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><div style = "margin-left: 30%;">Accrued liabilities</div></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['shortTermDebt']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><div style = "margin-left: 30%;">Other current liabilities</div></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['otherCurrentLiabilities']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><div style = "margin-left: 20%;"><strong>Total current liabilities</strong></div></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['totalCurrentLiabilities']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><strong><div style = "margin-left: 20%;">Non current liabilities</div></strong></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="color: #121212;">black</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><div style = "margin-left: 30%;">Other non current liabilities</div></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['otherNonCurrentLiabilities']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><strong><div style = "margin-left: 20%;">Total non current liabilities</div></strong></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['totalNonCurrentLiabilities']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><strong><div style = "margin-left: 10%;">Total liabilities</div></strong></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['totalLiabilities']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><strong><div style = "margin-left: 10%;">Stockholder's equity</div></strong></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="color: #121212;">black</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><div style = "margin-left: 20%;">Retained earnings</div></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['retainedEarnings']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><div style = "margin-left: 20%;">Accumulated other comprehensive income</div></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['accumulatedOtherComprehensiveIncomeLoss']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><strong><div style = "margin-left: 10%;">Total stockholder equity</div></strong></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['totalStockholdersEquity']}}</td>
+                                {% endfor %}
+                            </tr>
+                            <tr>
+                                <td scope="row"><strong><div>Total liabilities and shareholder's equity</div></strong></td>
+                                {% for i in range(0,balancesheetdic|length) %}
+                                <td style="text-align: center;">{{balancesheetdic[i]['totalLiabilitiesAndStockholdersEquity']}}</td>
+                                {% endfor %}
+                            </tr>
+                        </tbody>
+                    </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="container tabcontent" id="cashflow">
+        <div class="row">
+            <div class="col">
+                <div class="topnav">
+                    <br>
+                    <button class="tablink btn" onclick="openpage('financialstatement', this,'#CDCDCD')">Income
+                        Statement</button>
+                    <button class="tablink btn active" onclick="openpage('balance', this,'#CDCDCD')">Balance
+                        Sheet</button>
+                    <button class="tablink btn" onclick="openpage('cashflow', this,'#CDCDCD')">Cash Flow</button>
+                </div>
+                <br>
+                <h5><strong>Cash Flow Statement</strong></h5>
+                <p style="font-family : Helvetica; color: #CDCDCD;">Numbers are measured in millions.</p>
+                <table class="table">
                     <thead>
                         <tr>
                             <th scope="col">Breakdown</th>
-                            {% for i in range (0, 5 )%}
-                            <th scope="col">{{balancesheetdic[i]['fiscalDateEnding']}}</th>
-                            {% endfor %}
-                        </tr>
-                        <tr>
-                            <td scope="row">Assets</td>
-                            {% for i in range (0, 5 )%}
-                            <td style="color: #121212;">black</td>
-                            {% endfor %}
-                        </tr>
-                        <tr>
-                            <td scope="row" style="text-align: right;">Current Assets</td>
-                            {% for i in range (0, 5 )%}
-                            <td style="color: #121212;">black</td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <th scope="col" style="text-align: center;">{{cashflowdic[i]['date']}}</th>
                             {% endfor %}
                         </tr>
                     </thead>
                     <tbody>
+                        <tr>
+                            <td scope="row"><strong>Cash flows from operating activities</strong></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="color: #121212;">black</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><div style = "margin-left: 10%;">Net Income</div></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['netIncome']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><div style = "margin-left: 10%;">Depreciation & amortisation</div></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['depreciationAndAmortization']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><div style = "margin-left: 10%;">Deferred income tax</div></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['deferredIncomeTax']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><div style = "margin-left: 10%;">Stock based compensation</div></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['stockBasedCompensation']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><div style = "margin-left: 10%;">Change in working capital</div></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['changeInWorkingCapital']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><div style = "margin-left: 10%;">Accounts receivable</div></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['accountsReceivables']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><div style = "margin-left: 10%;">Accounts payable</div></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['accountsPayables']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><div style = "margin-left: 10%;">Other working capital</div></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['otherWorkingCapital']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><div style = "margin-left: 10%;">Other non-cash items</div></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['otherNonCashItems']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><strong>Net cash provided by operating activities</strong></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['netCashProvidedByOperatingActivities']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><strong>Cash flows from investing activities</strong></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="color: #121212;">black</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><div style = "margin-left:10%">Investments in property, plant and equipment</div></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['investmentsInPropertyPlantAndEquipment']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><div style = "margin-left:10%">Acquisitions, net</div></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['acquisitionsNet']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><div style = "margin-left:10%">Purchases of investments</div></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['purchasesOfInvestments']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><div style = "margin-left:10%">Sales/maturities of investments</div></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['salesMaturitiesOfInvestments']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><div style = "margin-left:10%">Other investing activities</div></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['otherInvestingActivites']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><strong>Net cash used for investing activities</strong></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['netCashUsedForInvestingActivites']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><strong>Cash flows from financing activities</strong></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="color: #121212;">black</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><div style = "margin-left:10%">Debt Repayment</div></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['debtRepayment']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><div style = "margin-left:10%">Common stock repurchased</div></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['commonStockRepurchased']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><strong><div style = "margin-left:10%">Other financing activities</div></strong></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['otherFinancingActivites']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><strong>Net cash used/provided for financing activities</strong></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['netCashUsedProvidedByFinancingActivities']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><strong>Net change in cash</strong></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['netCashUsedProvidedByFinancingActivities']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><strong>Cash at beginning of period</strong></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['cashAtBeginningOfPeriod']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><strong>Cash at end of period</strong></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['cashAtEndOfPeriod']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><strong>Free cash flow</strong></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center; color: #121212;">p</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><div style = "margin-left:10%">Operating cash flow</div></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['operatingCashFlow']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><div style = "margin-left:10%">Capital expenditure</div></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['capitalExpenditure']}}</td>
+                            {% endfor %}
+                        </tr>
+                        <tr>
+                            <td scope="row"><strong>Total free cash flow</strong></td>
+                            {% for i in range(0,cashflowdic|length) %}
+                            <td style="text-align: center;">{{cashflowdic[i]['freeCashFlow']}}</td>
+                            {% endfor %}
+                        </tr>
+
                     </tbody>
                 </table>
             </div>
@@ -321,6 +751,7 @@
     <div class="container">
         <div class="row">
             <div class="col tabcontent" id="profile">
+                <br>
                 <p>Name : {{eqdata['Name']}}</p>
                 <p>Address : {{eqdata['Address']}}</p>
                 <p>Sector : {{eqdata['Sector']}}</p>
@@ -340,12 +771,13 @@
     <div class="container tabcontent" id="financialratio">
         <div class="row">
             <div class="col">
+                <br>
                 <h5>Valuation Ratios</h5>
                 <table class="table">
                     <tbody>
                         <tr>
                             <th>Market Capitalization</th>
-                            <td style="text-align: right;">{{marketcap}}</td>
+                            <td style="text-align: right;">{{marketcap}}B</td>
                         </tr>
                         <tr>
                             <th>Trailing PE</th>
@@ -434,11 +866,11 @@
                         </tr>
                         <tr>
                             <th>EBITDA</th>
-                            <td style="text-align: right;">{{ebitda}}</td>
+                            <td style="text-align: right;">{{ebitda}}M</td>
                         </tr>
                         <tr>
                             <th>Diluted EPS (TTM)</th>
-                            <td style="text-align: right;">{{epsttm}}</td>
+                            <td style="text-align: right;">{{epsttm}}M</td>
                         </tr>
                         <tr>
                             <th>Quarterly Earnings Growth (YOY)</th>
@@ -448,6 +880,7 @@
                 </table>
             </div>
             <div class="col">
+                <br>
                 <h5>Trading Information</h5>
                 <h6> Stock Price History </h6>
                 <table class="table">
@@ -479,11 +912,11 @@
                     <tbody>
                         <tr>
                             <th>Shares Outstanding</th>
-                            <td style="text-align: right;">{{sharesoutstanding}}</td>
+                            <td style="text-align: right;">{{sharesoutstanding}}M</td>
                         </tr>
                         <tr>
                             <th>Float</th>
-                            <td style="text-align: right;">{{sharesfloat}}</td>
+                            <td style="text-align: right;">{{sharesfloat}}M</td>
                         </tr>
                         <tr>
                             <th>Percentage held by Insiders</th>
@@ -495,7 +928,7 @@
                         </tr>
                         <tr>
                             <th>Shares Short</th>
-                            <td style="text-align: right;">{{sharesshort}}</td>
+                            <td style="text-align: right;">{{sharesshort}}M</td>
                         </tr>
                         <tr>
                             <th>Short Ratio</th>
@@ -539,36 +972,30 @@
             </div>
         </div>
     </div>
-
-
-
-
-
-    <!-- HISTORICAL DATA -->
     <div class="container">
         <div class="row">
             <div class="col tabcontent" id="historicaldata">
                 <br>
-                <table class="table table-bordered">
+                <table class="table">
                     <thead>
                         <tr>
                             <th scope="col">Date</th>
-                            <th scope="col">Open</th>
-                            <th scope="col">High</th>
-                            <th scope="col">Low</th>
-                            <th scope="col">Close</th>
-                            <th scope="col">Volume</th>
+                            <th scope="col" style="text-align: center;">Open</th>
+                            <th scope="col" style="text-align: center;">High</th>
+                            <th scope="col" style="text-align: center;">Low</th>
+                            <th scope="col" style="text-align: center;">Close</th>
+                            <th scope="col" style="text-align: center;">Volume</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for k,v in historicdata.items() %}
+                        {% for k,v in historic.items() %}
                         <tr>
                             <th scope="row">{{k}}</th>
-                            <td>{{v['1. open']}}</td>
-                            <td>{{v['2. high']}}</td>
-                            <td>{{v['3. low']}}</td>
-                            <td>{{v['4. close']}}</td>
-                            <td>{{v['5. volume']}}</td>
+                            <td style="text-align: center;">{{v['1. open']}}</td>
+                            <td style="text-align: center;">{{v['2. high']}}</td>
+                            <td style="text-align: center;">{{v['3. low']}}</td>
+                            <td style="text-align: center;">{{v['4. close']}}</td>
+                            <td style="text-align: center;">{{v['5. volume']}}M</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -576,6 +1003,8 @@
             </div>
         </div>
     </div>
+
+    <!-- NEWS API -->
     <div class="container tabcontent" id="news">
         <div class="row">
             <div class="col">
@@ -583,20 +1012,23 @@
                     <br>
                     <button class="tablink btn" onclick="openpage('news', this)">All News</button>
                     <button class="tablink btn" onclick="openpage('company', this)">Stock News</button>
+                    <br>
                 </div>
                 {% for allnews in generalnewsdic %}
-                <div class="card">
+                <br>
+                <div class="card" style="background-color: #202020;">
                     <div class="row no-gutters">
-                        <div class="col">
+                        <div class="col-sm-3">
                             <img src="{{allnews['image_url']}}" class="card-img-top h-100" alt="...">
                         </div>
                         <div class="col">
                             <div class="card-body">
                                 <h5 class="card-title">{{allnews['title']}}</h5>
                                 <p class="card-text">{{allnews['text']}}</p>
-                                <p class="card-text">{{allnews['source_name']}}</p>
-                                <p class="card-text">{{allnews['date']}}</p>
-                                <a href="{{allnews['news_url']}}" class="btn btn-primary stretched-link">View Article</a>
+                                <p class="card-text">Publisher: {{allnews['source_name']}}</p>
+                                <p class="card-text">Date: {{allnews['date']}}</p>
+                                <a href="{{allnews['news_url']}}" class="btn btn-secondary stretched-link bg-secondary">View
+                                    Article</a>
                             </div>
                         </div>
                     </div>
@@ -604,39 +1036,46 @@
                 {% endfor %}
             </div>
         </div>
+        <br>
     </div>
     <div class="container tabcontent" id="company">
-        <div class="row">
+         <div class="row">
             <div class="col">
                 <div class="topnav">
                     <br>
                     <button class="tablink btn" onclick="openpage('news', this)">All News</button>
                     <button class="tablink btn" onclick="openpage('company', this)">Stock News</button>
+                    <br>
                 </div>
                 {% for allnews in stocknews %}
-                <div class="card">
+                <br>
+                <div class="card" style="background-color: #202020;">
                     <div class="row no-gutters">
-                        <div class="col">
-                            <img src="{{allnews['image_url']}}" style="height: 25%; width: 25%;" alt="...">
+                        <div class="col-sm-3">
+                            <img src="{{allnews['image_url']}}" class="card-img-top h-100" alt="...">
                         </div>
                         <div class="col">
                             <div class="card-body" style="background-color: #202020;">
                                 <h5 class="card-title">{{allnews['title']}}</h5>
                                 <p class="card-text">{{allnews['text']}}</p>
-                                <p class="card-text">{{allnews['source_name']}}</p>
-                                <p class="card-text">{{allnews['date']}}</p>
-                                <a href="{{allnews['news_url']}}" class="btn btn-primary stretched-link">View Article</a>
+                                <p class="card-text">Publisher: {{allnews['source_name']}}</p>
+                                <p class="card-text">Date: {{allnews['date']}}</p>
+                                <a href="{{allnews['news_url']}}" class="btn btn-secondary stretched-link bg-secondary">View
+                                    Article</a>
                             </div>
+                           
                         </div>
                     </div>
                 </div>
                 {% endfor %}
             </div>
         </div>
+        <br>
     </div>
+
     <script>
 
-        function openpage(pageName, elmnt) {
+        function openpage(pageName, elmnt, color) {
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("tabcontent");
             for (i = 0; i < tabcontent.length; i++) {
@@ -647,6 +1086,7 @@
                 tablinks[i].style.backgroundColor = "";
             }
             document.getElementById(pageName).style.display = "block";
+            elmnt.style.backgroundColor = color;
         }
         // Get the element with id="defaultOpen" and click on it
         document.getElementById("defaultOpen").click();
@@ -664,20 +1104,22 @@
                     </button>
                 </div>
                 <div class="modal-body" style="background-color:#121212; ">
-                    <form action="usequitypurchase" method="post">
-                        <input value="{{eqdata['Symbol']}}" name="stockticker" type="hidden">
+                    <input value="{{eqdata['Symbol']}}" name="stockticker" type="hidden">
+                    <form action="buy" method="post">
                         <p>Amount to purchase</p> <input placeholder="Key in the amount you want to purchase"
                             name="amount" type="text" value="" class="form-control">
                         <br>
-                        <p>Current Price</p> <input value="{{pastprices['1. open']}}" disabled name="price" type="text"
-                            class="form-control">
+                        <p>Price in SGD</p> <input value="{{totalvalue}}" name="sgdprice" type="text"  disabled class="form-control">
                         <br>
-                        <p>Price in SGD</p> <input value="{{totalvalue}}" disabled name="newprice" type="text"
-                            class="form-control">
-                        <br>
+                        <input value="{{totalvalue}}" name="priceinsgd" type="hidden" class="form-control" id = "priceinsgd">
+                        <input value="{{eqdata['Symbol']}}" name="stockticker" type="hidden" class="form-control" id = "ticker">
+                        <input value="{{eqdata['Name']}}" name="equityname" type="hidden" class="form-control" id = "name">
+                        <input value="{{eqdata['Sector']}}" name="sector" type="hidden" class="form-control" id = "sector">
                         <!-- one api call here -->
                         <p class="text-danger">*Do note that the current exchange rate for USD/SGD is {{sgd}} </p>
-                        <button class="btn btn-primary" type="submit">Buy</button>
+                        <div style = "text-align: center;">
+                        <button class="btn btn-success buybutton" type="submit" onclick="addPortfolio()">Buy</button>
+                        </div>
                     </form>
 
                 </div>
